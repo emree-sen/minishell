@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -Werror 
 LIBFT_PATH = libft
 LIBFT = libft/libft.a
-SRCS = minishell/lexer.c minishell/token.c
+SRCS = minishell/lexer.c minishell/token.c minishell/variables.c minishell/ext_meta.c minishell/str_to_token.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(LIBFT) $(NAME)

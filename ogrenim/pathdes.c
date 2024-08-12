@@ -61,6 +61,7 @@ void execute_command(char *command, char *args[]) {
 int main() {
     char *input;
     char *args[10];  // Maksimum 10 argüman için yer ayırdık
+	char **env = environ;
 
     while (1) {
         // Kullanıcıdan komut al
