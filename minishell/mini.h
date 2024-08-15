@@ -55,9 +55,10 @@ void variables_add_last(t_variables **root, t_variables *variables);
 
 int pass_quote(char *str, int qi);
 int pass_str(char *str, int si);
+int pass_any(char *str, int *ai, char any);
 
 void toggle_quote(int *quote, char c);
-
+void toggle_single_quote(int *quote, char c);
 //stryi alıp GERÇEK boşluklara göre link list'e yerleştirecek, halkın adamı!
 // tokeni fonksiyonda oluştur. 
 t_token	*str_to_token(char *str); 
@@ -73,7 +74,7 @@ void token_extract_creator(t_token *tmp, t_token **token_root,t_token *new,int i
 // bu işlemden sonra gerçek boşluk ayırmaya terkar ihtiyaç olabileceğinden root pointer'ı verilir
 void token_split_dollars(t_token **token_root, t_variables *var_root);
 t_variables *dup_veriables(char **environ);
-
+void token_replace_dollars(char **token_root, char *key, char *value, int start);
 
 // gereksiz tırnakları temizler
 void token_del_quote(t_token *token_root);

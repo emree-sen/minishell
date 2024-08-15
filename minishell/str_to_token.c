@@ -17,6 +17,14 @@ int pass_str(char *str, int si)
 	return (si);
 }
 
+int pass_any(char *str, int *ai, char any)
+{
+	while (str[*ai] && str[*ai] == any)
+		(*ai)++;
+	return (*ai);
+}
+
+
 t_token *str_to_token(char *str)
 {
 	t_token *root;
@@ -26,11 +34,10 @@ t_token *str_to_token(char *str)
 
 	i = -1;
 	root = NULL;
+	str = ft_strtrim(str, " ");
 	while (str[++i])
 	{
-		while(str[i] == ' ')
-			i++;
-		start = i;
+		start = pass_any(str, &i, ' ');
 		while(str[i])
 		{
 			if(str[i] == '\'' || str[i] == '\"')
