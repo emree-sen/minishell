@@ -9,6 +9,9 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(LIBFT) $(NAME)
 
+run: all
+	./$(NAME)
+
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -lreadline -o $(NAME)
 

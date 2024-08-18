@@ -38,6 +38,12 @@ typedef struct s_variables
 	struct s_variables	*next;
 } t_variables;
 
+typedef struct s_state
+{
+	int status;
+	t_token **token_arr;
+} t_state;
+
 //hazırlık
 t_token *token_new(char *str, t_token_type type);
 void token_del(t_token *token);
@@ -58,7 +64,7 @@ int pass_str(char *str, int si);
 int pass_any(char *str, int *ai, char any);
 
 void toggle_quote(int *quote, char c);
-void toggle_single_quote(int *quote, char c);
+void toggle_single_quote(int *quote, char c, int *dquote);
 //stryi alıp GERÇEK boşluklara göre link list'e yerleştirecek, halkın adamı!
 // tokeni fonksiyonda oluştur. 
 t_token	*str_to_token(char *str); 
@@ -74,7 +80,9 @@ void token_extract_creator(t_token *tmp, t_token **token_root,t_token *new,int i
 // bu işlemden sonra gerçek boşluk ayırmaya terkar ihtiyaç olabileceğinden root pointer'ı verilir
 void token_split_dollars(t_token **token_root, t_variables *var_root);
 t_variables *dup_veriables(char **environ);
-void token_replace_dollars(char **token_root, char *key, char *value, int start);
+void token_replace_value(t_token **token_root, char *key, char *value, int *start);
+char *token_value_finder(t_token *tmp, char **key, int *i, t_variables *var_root);
+void token_value_checker(t_variables *var_tmp, char *key, char **value);
 
 // gereksiz tırnakları temizler
 void token_del_quote(t_token *token_root);

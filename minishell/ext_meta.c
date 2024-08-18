@@ -68,6 +68,7 @@ void token_extract_creator(t_token *tmp, t_token **token_root,t_token *new,int i
 	{
 		if(tmp->str[i] == '|' || tmp->str[i] == '>' || tmp->str[i] == '<')
 		{
+			// meta tiplerini doğru sınıflandır
 			i = token_extract_metas(tmp, token_root, new, i);
 		}
 		else
