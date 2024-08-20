@@ -97,6 +97,10 @@ void token_replace_value(t_token **token_root, t_dollar *dollar, int *i, t_state
 char *token_value_finder(t_token *tmp, t_dollar *dollar, t_variables *var_root);
 void token_value_checker(t_variables *var_tmp, char *key, char **value);
 
+//dolar sonrası space kontrolü
+void token_extract_spaces(t_token **token_root);
+void token_extract_sp_creator(t_token *tmp, t_token **token_root, t_token *new, int i);
+
 // gereksiz tırnakları temizler
 void token_del_quote(t_token *token_root);
 // token listesini pipe + 1 parçaya ayırıp listesini döner

@@ -52,6 +52,70 @@ void token_value_checker(t_variables *var_tmp, char *key, char **value)
 	}
 }
 
+int is_has_space(char *str)
+{
+	int i;
+	int flag;
+
+	flag = -1;
+	i = -1;
+	while (str[++i])
+	{
+		toggle_quote(&flag, str[i]);
+		if (flag == -1 && str[i] == ' ')
+			return (1);
+	}
+	return (0);
+}
+
+void token_extract_sp_creator(t_token *tmp, t_token **token_root, t_token *new, int i)
+{
+	int start;
+	
+	while (tmp->str[i])
+	{
+		if(tmp->str[i] == ' ')
+			i++;
+		else
+		{
+			start = i;
+			while (tmp->str[i] && tmp->str[i] != ' ')
+				i++;
+			new = token_new(ft_substr(tmp->str, start, i - start), NONE);
+			token_add_prev(token_root, tmp, new);
+		}
+	}
+}
+
+void token_extract_spaces(t_token **token_root)
+{
+	t_token *tmp;
+	t_token *new;
+	int i;
+
+	i = 0;
+	tmp = *token_root;
+	new = NULL;
+	while (tmp)
+	{
+		if(is_has_space(tmp->str))
+		{
+			token_extract_sp_creator(tmp, token_root, new, 0);
+			if(tmp->prev)
+			{
+				tmp = tmp->prev;
+				token_del(tmp->next);
+			}
+		}
+		else
+		{
+			tmp = tmp->next;
+		}
+	}
+}
+
+
+
 char *token_value_finder(t_token *tmp, t_dollar *dollar, t_variables *var_root)
 {
 	int start;
@@ -101,22 +165,22 @@ void token_split_dollars(t_token **token_root, t_variables *var_root, t_state *s
 				token_replace_value(&tmp, &dollar, &dollar.i, state);
 			}			
 		}
+
 		tmp = tmp->next;
 	}
+	token_extract_spaces(token_root);
 }
 
 
 
 void token_replace_value(t_token **str, t_dollar *dollar, int *i, t_state *state)
 {
-	int start;
 	int end;
 	char *left;
 	char *right;
 
-	start = *i;
 	end = *i + ft_strlen(dollar->key);
-	left = ft_substr((*str)->str, 0, start);
+	left = ft_substr((*str)->str, 0, *i);
 	right = ft_substr((*str)->str, end + 1, ft_strlen((*str)->str) - end);
 	if(!dollar->value)
 	{
@@ -137,7 +201,7 @@ void token_replace_value(t_token **str, t_dollar *dollar, int *i, t_state *state
 }
 
 
-void token_dollar_quesmark();
+
 
 int main()
 {
