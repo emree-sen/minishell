@@ -93,7 +93,7 @@ void token_list_printer(t_token *root)
 	tmp = root;
 	while (tmp)
 	{
-		printf("%s\n", tmp->str);
+		printf("String: %s, Type: %u\n", tmp->str, tmp->type);
 		tmp = tmp->next;
 	}
 }

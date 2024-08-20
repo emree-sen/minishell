@@ -13,8 +13,8 @@ typedef enum e_token_type
 {
 	NONE,
 	CMD,
-	PIPE,
 	ARG,
+	PIPE,
 	REDR,
 	REDL,
 	REDRR,
@@ -44,6 +44,16 @@ typedef struct s_state
 	t_token **token_arr;
 } t_state;
 
+typedef struct s_dollar
+{
+	int 		i;
+	char 		*key;
+	char 		*value;
+	int 		flag;
+	int 		flag2;
+
+} t_dollar;
+
 //hazırlık
 t_token *token_new(char *str, t_token_type type);
 void token_del(t_token *token);
@@ -61,13 +71,14 @@ void variables_add_last(t_variables **root, t_variables *variables);
 
 int pass_quote(char *str, int qi);
 int pass_str(char *str, int si);
+int pass_str_pls(char *str, int i);
 int pass_any(char *str, int *ai, char any);
 
 void toggle_quote(int *quote, char c);
 void toggle_single_quote(int *quote, char c, int *dquote);
 //stryi alıp GERÇEK boşluklara göre link list'e yerleştirecek, halkın adamı!
 // tokeni fonksiyonda oluştur. 
-t_token	*str_to_token(char *str); 
+t_token	*str_to_token(char *str);
 
 // str_to_token'den gelen link list'i meta karakterlere göre değiştirecek
 int is_has_meta(char *str);
@@ -75,13 +86,15 @@ int is_only_meta(char *str);
 void token_extract_all_meta(t_token **token_root);
 int token_extract_metas(t_token *tmp, t_token **token_root,t_token *new,int i);
 void token_extract_creator(t_token *tmp, t_token **token_root,t_token *new,int i);
+void token_meta_type_changer(t_token *tmp, int i);
+void token_new_add_prev(t_token **token_root, t_token *tmp, t_token *new, int *i);
 
 // dolar işaretlerini değişken içerikleriyle değiştir. Bunun için variables structını kullan 
 // bu işlemden sonra gerçek boşluk ayırmaya terkar ihtiyaç olabileceğinden root pointer'ı verilir
-void token_split_dollars(t_token **token_root, t_variables *var_root);
+void token_split_dollars(t_token **token_root, t_variables *var_root, t_state *state);
 t_variables *dup_veriables(char **environ);
-void token_replace_value(t_token **token_root, char *key, char *value, int *start);
-char *token_value_finder(t_token *tmp, char **key, int *i, t_variables *var_root);
+void token_replace_value(t_token **token_root, t_dollar *dollar, int *i, t_state *state);
+char *token_value_finder(t_token *tmp, t_dollar *dollar, t_variables *var_root);
 void token_value_checker(t_variables *var_tmp, char *key, char **value);
 
 // gereksiz tırnakları temizler

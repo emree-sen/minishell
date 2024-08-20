@@ -36,24 +36,68 @@ int is_only_meta(char *str)
 	return (1);
 }
 
-int token_extract_metas(t_token *tmp, t_token **token_root,t_token *new,int i)
+void token_new_add_prev(t_token **token_root, t_token *tmp, t_token *new, int *i)
 {
-	if (tmp->str[i + 1] == '>')
+	if(tmp->str[*i]== '|')
 	{
-		new = token_new(ft_substr(tmp->str, i, 2), REDRR);
+		new = token_new(ft_substr(tmp->str, *i, 1), PIPE);
 		token_add_prev(token_root, tmp, new);
-		i += 2;
+		*i += 1;
 	}
-	else if (tmp->str[i + 1] == '<')
+	else if(tmp->str[*i + 1] == '>')
 	{
-		new = token_new(ft_substr(tmp->str, i, 2), REDLL);
+		new = token_new(ft_substr(tmp->str, *i, 2), REDRR);
 		token_add_prev(token_root, tmp, new);
-		i += 2;
+		*i += 2;
 	}
 	else
 	{
-		new = token_new(ft_substr(tmp->str, i++, 1), PIPE);
+		new = token_new(ft_substr(tmp->str, *i, 2), REDLL);
 		token_add_prev(token_root, tmp, new);
+		*i += 2;
+	}
+}
+
+int token_extract_metas(t_token *tmp, t_token **token_root,t_token *new, int i)
+{
+	if(tmp->str[i] == '<')
+	{
+		if(tmp->str[i + 1] == '<')
+			token_new_add_prev(token_root, tmp, new, &i);
+		else
+		{
+			new = token_new(ft_substr(tmp->str, i++, 1), REDL);
+			token_add_prev(token_root, tmp, new);
+		}
+	}
+	else if(tmp->str[i] == '>')
+	{
+
+		if(tmp->str[i + 1] == '>')
+			token_new_add_prev(token_root, tmp, new, &i);
+		else
+		{
+			new = token_new(ft_substr(tmp->str, i++, 1), REDR);
+			token_add_prev(token_root, tmp, new);
+		}
+	}
+	else
+		token_new_add_prev(token_root, tmp, new, &i);
+	return (i);
+}
+
+int pass_str_pls(char *str, int i)
+{
+	int flag;
+
+	flag = -1;
+	while (str[i])
+	{
+		toggle_quote(&flag, str[i]);
+		if (str[i] && (flag != -1 || (flag == -1 && (str[i] != '|' && str[i] != '>' && str[i] != '<'))))
+			i++;
+		else
+			break;
 	}
 	return (i);
 }
@@ -61,24 +105,44 @@ int token_extract_metas(t_token *tmp, t_token **token_root,t_token *new,int i)
 void token_extract_creator(t_token *tmp, t_token **token_root,t_token *new,int i)
 {
 	int start;
-	int flag;
 
-	flag = 0;
 	while(tmp->str[i])
 	{
 		if(tmp->str[i] == '|' || tmp->str[i] == '>' || tmp->str[i] == '<')
 		{
-			// meta tiplerini doğru sınıflandır
 			i = token_extract_metas(tmp, token_root, new, i);
 		}
 		else
 		{
 			start = i;
-			i = pass_str(tmp->str, i);
+			i = pass_str_pls(tmp->str, i);
 			new = token_new(ft_substr(tmp->str, start, i - start), NONE);
 			token_add_prev(token_root, tmp, new);
 		}
 	}
+}
+
+void token_meta_type_changer(t_token *tmp, int i)
+{
+	if(tmp->str[i] == '|')
+		tmp->type = PIPE;
+	else if(tmp->str[i] == '>')
+	{
+		if(tmp->str[i + 1] == '>')
+			tmp->type = REDRR;
+		else
+			tmp->type = REDR;
+	}
+	else if(tmp->str[i] == '<')
+	{
+		if(tmp->str[i + 1] == '<')
+			tmp->type = REDLL;
+		else
+			tmp->type = REDL;
+	}
+	else
+		tmp->type = NONE;
+
 }
 
 void token_extract_all_meta(t_token **token_root)
@@ -103,6 +167,9 @@ void token_extract_all_meta(t_token **token_root)
 			}
 		}
 		else
+		{
+			token_meta_type_changer(tmp, i);
 			tmp = tmp->next;
+		}
 	}
 }

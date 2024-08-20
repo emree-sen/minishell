@@ -12,6 +12,7 @@ int pass_quote(char *str, int qi)
 
 int pass_str(char *str, int si)
 {
+	
 	while (str[si] && str[si] != '|' && str[si] != '>' && str[si] != '<')
 		si++;
 	return (si);

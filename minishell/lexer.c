@@ -52,7 +52,7 @@ void token_value_checker(t_variables *var_tmp, char *key, char **value)
 	}
 }
 
-char *token_value_finder(t_token *tmp, char **key, int *i, t_variables *var_root)
+char *token_value_finder(t_token *tmp, t_dollar *dollar, t_variables *var_root)
 {
 	int start;
 	int end;
@@ -60,49 +60,45 @@ char *token_value_finder(t_token *tmp, char **key, int *i, t_variables *var_root
 	t_variables *var_tmp;
 
 	value = NULL;
-	start = *i;
-	end = *i;
+	start = dollar->i;
+	end = dollar->i;
 	end++;
 	if (ft_isdigit(tmp->str[end]) == 1)
 		end++;
 	else
 	{
-		while (tmp->str[end] && (ft_isalnum(tmp->str[end]) || tmp->str[end] == '_'))
+		while (tmp->str[end] && (ft_isalnum(tmp->str[end]) || tmp->str[end] == '_' || tmp->str[end] == '?'))
 			end++;					
 	}
-	*key = ft_substr(tmp->str, start + 1, end - start - 1);
+	dollar->key = ft_substr(tmp->str, start + 1, end - start - 1);
 	var_tmp = var_root;
 	while (var_tmp)
 	{
-		token_value_checker(var_tmp, *key, &value);
+		token_value_checker(var_tmp, dollar->key, &value);
 		var_tmp = var_tmp->next;
 	}
 	return (value);
 }
 
-void token_split_dollars(t_token **token_root, t_variables *var_root)
+void token_split_dollars(t_token **token_root, t_variables *var_root, t_state *state)
 {
 	t_token *tmp;
-	int i;
-	char *key;
-	char *value;
-	int flag;
-	int flag2;
+	t_dollar dollar;
 
-	value = NULL;
-	flag2 = -1;
-	flag = -1;
+	dollar.value = NULL;
+	dollar.flag = -1;
+	dollar.flag2 = -1;
 	tmp = *token_root;
 	while (tmp)
 	{
-		i = -1;
-		while (tmp->str[++i])
+		dollar.i = -1;
+		while (tmp->str[++dollar.i])
 		{
-			toggle_single_quote(&flag, tmp->str[i], &flag2);
-			if (flag == -1 && tmp->str[i] == '$')
+			toggle_single_quote(&dollar.flag, tmp->str[dollar.i], &dollar.flag2);
+			if (dollar.flag == -1 && tmp->str[dollar.i] == '$')
 			{
-				value = token_value_finder(tmp, &key, &i, var_root);
-				token_replace_value(&tmp, key, value, &i);
+				dollar.value = token_value_finder(tmp, &dollar, var_root);
+				token_replace_value(&tmp, &dollar, &dollar.i, state);
 			}			
 		}
 		tmp = tmp->next;
@@ -110,7 +106,8 @@ void token_split_dollars(t_token **token_root, t_variables *var_root)
 }
 
 
-void token_replace_value(t_token **str, char *key, char *value, int *i)
+
+void token_replace_value(t_token **str, t_dollar *dollar, int *i, t_state *state)
 {
 	int start;
 	int end;
@@ -118,17 +115,22 @@ void token_replace_value(t_token **str, char *key, char *value, int *i)
 	char *right;
 
 	start = *i;
-	end = *i + ft_strlen(key);
+	end = *i + ft_strlen(dollar->key);
 	left = ft_substr((*str)->str, 0, start);
 	right = ft_substr((*str)->str, end + 1, ft_strlen((*str)->str) - end);
-	if(!value)
+	if(!dollar->value)
 	{
-		value = ft_strdup("");
+		if(ft_strcmp(dollar->key, "?") == 0)
+			dollar->value = ft_itoa(state->status);
+		else if(ft_strcmp(dollar->key, "0") == 0)
+			dollar->value = ft_strdup("minishell");
+		else
+			dollar->value = ft_strdup("");
 		*i = *i - 1; 
 	}
 	else
-		value = ft_strdup(value);
-	(*str)->str = ft_strjoin(left, value);
+		dollar->value = ft_strdup(dollar->value);
+	(*str)->str = ft_strjoin(left, dollar->value);
 	(*str)->str = ft_strjoin((*str)->str, right);
 	free(left);
 	free(right);
@@ -141,9 +143,11 @@ int main()
 {
 	while (1)
 	{
+		t_state state;
+		state.status = 0;
 		extern char **environ;
 		char **env = environ;
-		// test str_to_token func in readline
+
 		char *line;
 		t_token *root;
 		t_variables *var_root;
@@ -154,16 +158,10 @@ int main()
 		// variables_list_printer(var_root);
 
 		root = str_to_token(line);
-		/*
-		t_token *new;
-		new = token_new("new", NONE);
-		token_add_prev(&root, root, new);
-		*/
 
 		token_extract_all_meta(&root);
-		token_split_dollars(&root, var_root);
+		token_split_dollars(&root, var_root, &state);
 
-		// token_split_dollars(&root, var_root);
 		token_list_printer(root);
 	}
 }
