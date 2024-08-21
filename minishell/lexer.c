@@ -68,6 +68,22 @@ int is_has_space(char *str)
 	return (0);
 }
 
+int is_has_quote(char *str)
+{
+	int i;
+	int flag;
+
+	flag = -1;
+	i = -1;
+	while (str[++i])
+	{
+		toggle_quote(&flag, str[i]);
+		if (flag == -1 && (str[i] == '\'' || str[i] == '\"'))
+			return (1);
+	}
+	return (0);
+}
+
 void token_extract_sp_creator(t_token *tmp, t_token **token_root, t_token *new, int i)
 {
 	int start;
@@ -200,6 +216,87 @@ void token_replace_value(t_token **str, t_dollar *dollar, int *i, t_state *state
 	free(right);
 }
 
+int is_only_quote(char *str)
+{
+	char c;
+	int i;
+
+	i = 0;
+	c = str[0];
+	while(str[i])
+	{
+		if(str[i] != c)
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+void token_quote_detective(t_token *tmp)
+{
+    int i;
+    int j;
+    int flag;
+    char *str;
+
+	if (is_only_quote(tmp->str))
+	{
+		tmp->str = ft_strdup("");
+		return ;
+	}
+    str = (char *)malloc(sizeof(char) * (ft_strlen(tmp->str) + 1));
+    i = 0;
+    j = 0;
+    flag = -1;
+
+    while (tmp->str[i])
+    {
+		while(tmp->str[i] && ((tmp->str[i] != '\'' && tmp->str[i] != '\"')))
+		{
+			str[j++] = tmp->str[i++];
+		}
+		toggle_quote(&flag, tmp->str[i++]);
+		while(flag != -1 && tmp->str[i])
+		{				
+			toggle_quote(&flag, tmp->str[i]);
+			if(flag != -1)
+				str[j++] = tmp->str[i++];	
+			else
+				i++;
+		}
+    }
+	tmp->str = ft_strdup(str);
+}
+
+void token_del_quote(t_token *token_root)
+{
+	t_token *tmp;
+	t_token *new;
+	int i;
+
+	i = 0;
+	tmp = token_root;
+	new = NULL;
+	while (tmp)
+	{
+		if(is_has_quote(tmp->str))
+		{
+
+			token_quote_detective(tmp);
+			tmp = tmp->next;
+		}
+		else
+		{
+			tmp = tmp->next;
+		}
+	}
+}
+
+
+
+
+
+
 
 
 
@@ -225,6 +322,7 @@ int main()
 
 		token_extract_all_meta(&root);
 		token_split_dollars(&root, var_root, &state);
+		token_del_quote(root);
 
 		token_list_printer(root);
 	}
