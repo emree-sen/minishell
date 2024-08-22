@@ -12,7 +12,7 @@ int pass_quote(char *str, int qi)
 
 int pass_str(char *str, int si)
 {
-	
+
 	while (str[si] && str[si] != '|' && str[si] != '>' && str[si] != '<')
 		si++;
 	return (si);
@@ -25,7 +25,6 @@ int pass_any(char *str, int *ai, char any)
 	return (*ai);
 }
 
-
 t_token *str_to_token(char *str)
 {
 	t_token *root;
@@ -33,17 +32,18 @@ t_token *str_to_token(char *str)
 	int i;
 	int start;
 
-	i = -1;
+	i = 0;
 	root = NULL;
 	str = ft_strtrim(str, " ");
-	while (str[++i])
+	while (str[i])
 	{
+		start = 0;
 		start = pass_any(str, &i, ' ');
-		while(str[i])
+		while (str[i])
 		{
-			if(str[i] == '\'' || str[i] == '\"')
-				i = pass_quote(str,i);
-			if(str[i] && str[i] != ' ')
+			if (str[i] == '\'' || str[i] == '\"')
+				i = pass_quote(str, i);
+			if (str[i] && str[i] != ' ')
 				i++;
 			else
 				break;
@@ -51,5 +51,5 @@ t_token *str_to_token(char *str)
 		token = token_new(ft_substr(str, start, i - start), NONE);
 		token_add_last(&root, token);
 	}
-	return (root);
+	return(root);
 }
