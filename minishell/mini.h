@@ -104,10 +104,35 @@ void token_extract_sp_creator(t_token *tmp, t_token **token_root, t_token *new, 
 // gereksiz tırnakları temizler
 void token_del_quote(t_token *token_root);
 // token listesini pipe + 1 parçaya ayırıp listesini döner
-t_token **token_seperate_by_pipe(t_token *token_root);
+t_token *copy_token_list(t_token *start, t_token *end);
+t_token **add_to_token_list_array(t_token **token_list_array, t_token *new_list, int *size);
+t_token **finalize_token_list_array(t_token **list_array, int size);
+void	process_tokens(t_token *start, t_token *current, t_token ***separated_lists, int *size);
+t_token	**finalize_token_array(t_token **list_array, int size);
+t_token **token_separate_by_pipe(t_token *token_root);
 // token listesini anlamlı parçalar olarak tanımlar
-void token_arr_set_type(t_token **token_arr);
+void	set_token_type(t_token *token);
+void	handle_redirection(t_token **token);
+void 	token_arr_set_type(t_token **token_arr);
 
-
+//syntax kontrol
+int check_the_syntax(char *input);
+int is_pipe_first(char *input);
+int is_pipe_last(char *input);
+int double_pipe(char *input);
+int print_syntax_error_quote();
+int print_syntax_error_pipe();
+int print_unexpected_char_error();
+int pass_the_quotes(char c, int quote);
+int print_syntax_error_redir();
+int redirect_check(char *input);
+int pass_the_spaces(char *input, int i);
+int	redir_plus_pipe(char *input);
+int	redir_plus_pipe_two(char *input);
+int	mixed_redir(char *input);
+int	mixed_redir_two(char *input);
+int	mixed_redir_three(char *input);
+int	mixed_redir_four(char *input);
+int	last_arg_is_redir(char *input);
 
 #endif

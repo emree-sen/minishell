@@ -322,40 +322,6 @@ void token_del_quote(t_token *token_root)
 	}
 }
 
-// void token_pipe_seperator(t_token *token_root, t_state *state)
-// {	
-// 	t_token *tmp;
-// 	t_state *state_tmp;
-// 	int i;
-// 	int j;
-
-// 	i = 0;
-// 	j = 0;
-// 	tmp = token_root;
-// 	state_tmp = state;
-
-// 	while (tmp)
-// 	{
-// 		if (ft_strcmp(tmp->str, "|") != 0)
-// 		{
-// 			state_tmp->token_arr[0]->str = tmp->str;
-// 			state_tmp->token_arr[0]->type = tmp->type;
-// 			state_tmp->token_arr[0]->prev = tmp->prev;
-// 			state_tmp->token_arr[0]->next = tmp->next;
-// 			state_tmp->token_arr[1]->str = tmp->str;
-// 			state_tmp->token_arr[1]->type = tmp->type;
-// 			state_tmp->token_arr[1]->prev = tmp->prev;
-// 			state_tmp->token_arr[1]->next = tmp->next;
-// 			i++;
-// 		}
-// 		else if (ft_strcmp(tmp->str, "|") == 0)
-// 		{
-// 			j++;
-// 			i = 0;
-// 		}
-// 		tmp = tmp->next;
-// 	}
-// }
 void print_state(t_state *state)
 {
 	int i;
@@ -366,6 +332,197 @@ void print_state(t_state *state)
 	while (state->token_arr[j][i].str)
 	{
 		printf("%s\n", state->token_arr[j][i].str);
+		i++;
+	}
+}
+
+t_token *copy_token_list(t_token *start, t_token *end)
+{
+    t_token *new_list;
+    t_token *current;
+    t_token *last;
+	t_token *new_token;
+
+	current = start;
+	new_list = NULL;
+	last = NULL;
+    while (current != end) 
+	{
+        new_token = token_new(current->str, current->type);
+        if (!new_token)
+            return NULL;
+        if (!new_list)
+            new_list = new_token;
+        else 
+		{
+            last->next = new_token;
+            new_token->prev = last;
+        }
+        last = new_token;
+        current = current->next;
+    }
+    return new_list;
+}
+
+t_token **add_to_token_list_array(t_token **token_list_array, 
+	t_token *new_list, int *size)
+{
+    t_token **new_array;
+    int i;
+	
+	new_array = malloc(sizeof(t_token *) * (*size + 1));
+	i = 0;
+	if (!new_array) 
+        return NULL;
+
+    // Eski listeyi yeniye kopyala
+    while (i < *size) 
+	{
+        new_array[i] = token_list_array[i];
+		i++;
+	}
+
+    // Yeni listeyi ekle
+    new_array[*size] = new_list;
+    (*size)++;
+
+    // Eski listeyi serbest bırak
+    free(token_list_array);
+
+    return new_array;
+}
+
+t_token **finalize_token_list_array(t_token **list_array, int size)
+{
+	int i;
+
+	i = 0; 
+    t_token **final_list;
+	final_list = malloc(sizeof(t_token *) * (size + 1));
+    if (!final_list)
+        return NULL;
+    
+    while (i < size) 
+	{
+        final_list[i] = list_array[i];
+		i++;
+	}
+    final_list[size] = NULL;
+    free(list_array);
+    return final_list;
+}
+
+t_token	**finalize_token_array(t_token **list_array, int size)
+{
+	t_token	**final_list;
+	int		i;
+
+	final_list = malloc(sizeof(t_token *) * (size + 1));
+	if (!final_list)
+		return (NULL);
+	i = 0;
+	while (i < size)
+	{
+		final_list[i] = list_array[i];
+		i++;
+	}
+	final_list[size] = NULL;
+	free(list_array);
+	return (final_list);
+}
+
+void	process_tokens(t_token *start, t_token *current, 
+	t_token ***separated_lists, int *size)
+{
+	t_token	*new_list;
+
+	new_list = copy_token_list(start, current);
+	if (new_list)
+		*separated_lists = add_to_token_list_array(*separated_lists, new_list, size);
+}
+
+t_token	**token_separate_by_pipe(t_token *token_root)
+{
+	t_token	**separated_lists;
+	t_token	*current;
+	t_token	*start;
+	int		size;
+
+	separated_lists = NULL;
+	current = token_root;
+	start = token_root;
+	size = 0;
+	while (current)
+	{
+		if (current->type == PIPE)
+		{
+			process_tokens(start, current, &separated_lists, &size);
+			start = current->next;
+		}
+		current = current->next;
+	}
+	if (start)
+		process_tokens(start, NULL, &separated_lists, &size);
+	return (finalize_token_array(separated_lists, size));
+}
+
+void	set_token_type(t_token *token)
+{
+	if (ft_strcmp(token->str, "|") == 0)
+		token->type = PIPE;
+	else if (ft_strcmp(token->str, ">") == 0)
+		token->type = REDR;
+	else if (ft_strcmp(token->str, "<") == 0)
+		token->type = REDL;
+	else if (ft_strcmp(token->str, ">>") == 0)
+		token->type = REDRR;
+	else if (ft_strcmp(token->str, "<<") == 0)
+		token->type = REDLL;
+	else
+		token->type = ARG;
+}
+
+void	handle_redirection(t_token **token)
+{
+	t_token	*tmp;
+
+	tmp = *token;
+	if (tmp->type == REDR || tmp->type == REDL || tmp->type == REDRR)
+	{
+		if (tmp->next && tmp->next->str)
+		{
+			tmp = tmp->next;
+			tmp->type = FILEE;
+		}
+	}
+	else if (tmp->type == REDLL)
+	{
+		if (tmp->next && tmp->next->str)
+		{
+			tmp = tmp->next;
+			tmp->type = HEREDOC;
+		}
+	}
+	*token = tmp;
+}
+
+void	token_arr_set_type(t_token **token_arr)
+{
+	int		i;
+	t_token	*token_root;
+
+	i = 0;
+	while (token_arr[i])
+	{
+		token_root = token_arr[i];
+		token_root->type = CMD;
+		token_root = token_root->next;
+		while (token_root)
+		{
+			set_token_type(token_root);
+			handle_redirection(&token_root);
+			token_root = token_root->next;
+		}
 		i++;
 	}
 }
@@ -386,15 +543,25 @@ int main()
 		add_history(line);
 		var_root = dup_veriables(env);
 
-		// variables_list_printer(var_root);
+		if(ft_strlen(line) > 0)
+			check_the_syntax(line);
+		var_root = dup_veriables(env);
 
 		root = str_to_token(line);
 
 		token_extract_all_meta(&root);
 		token_split_dollars(&root, var_root, &state);
 		token_del_quote(root);
+		state.token_arr = token_separate_by_pipe(root);
+		token_arr_set_type(state.token_arr);
 
-		token_list_printer(root);
-		//print_state(&state);
+		int i = 0;
+		printf("\n");
+		while(state.token_arr[i])
+		{
+			token_list_printer(state.token_arr[i]);
+			printf("\n");
+			i++;
+		}
 	}
 }

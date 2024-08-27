@@ -1,10 +1,10 @@
 NAME = mini
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -g #-fsanitize=address -g
 LIBFT_PATH = libft
 LIBFT = libft/libft.a
-SRCS = minishell/lexer.c minishell/token.c minishell/variables.c minishell/ext_meta.c minishell/str_to_token.c
+SRCS = minishell/lexer.c minishell/token.c minishell/variables.c minishell/ext_meta.c minishell/str_to_token.c minishell/syntax_check.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(LIBFT) $(NAME)
