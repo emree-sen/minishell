@@ -1,8 +1,8 @@
 #include "mini.h"
 
-t_variables *variables_new(char *key, char *value)
+t_variables	*variables_new(char *key, char *value)
 {
-	t_variables *variables;
+	t_variables	*variables;
 
 	variables = (t_variables *)malloc(sizeof(t_variables));
 	variables->key = key;
@@ -11,14 +11,14 @@ t_variables *variables_new(char *key, char *value)
 	return (variables);
 }
 
-void variables_add_last(t_variables **root, t_variables *variables)
+void	variables_add_last(t_variables **root, t_variables *variables)
 {
-	t_variables *tmp;
+	t_variables	*tmp;
 
 	if (*root == NULL)
 	{
 		*root = variables;
-		return;
+		return ;
 	}
 	tmp = *root;
 	while (tmp->next)
@@ -27,9 +27,9 @@ void variables_add_last(t_variables **root, t_variables *variables)
 	variables->next = NULL;
 }
 
-void variables_list_printer(t_variables *root)
+void	variables_list_printer(t_variables *root)
 {
-	t_variables *tmp;
+	t_variables	*tmp;
 
 	tmp = root;
 	while (tmp)

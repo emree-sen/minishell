@@ -1,8 +1,8 @@
 #include "mini.h"
 
-t_token *token_new(char *str, t_token_type type)
+t_token	*token_new(char *str, t_token_type type)
 {
-	t_token *token;
+	t_token	*token;
 
 	token = (t_token *)malloc(sizeof(t_token));
 	token->str = str;
@@ -12,14 +12,14 @@ t_token *token_new(char *str, t_token_type type)
 	return (token);
 }
 
-void token_add_last(t_token **root, t_token *token)
+void	token_add_last(t_token **root, t_token *token)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
 	if (*root == NULL)
 	{
 		*root = token;
-		return;
+		return ;
 	}
 	tmp = *root;
 	while (tmp->next)
@@ -29,13 +29,13 @@ void token_add_last(t_token **root, t_token *token)
 	token->next = NULL;
 }
 
-void token_del(t_token *token)
+void	token_del(t_token *token)
 {
-	if(token->prev)
+	if (token->prev)
 		token->prev->next = token->next;
 	else
 		token->prev = NULL;
-	if(token->next)
+	if (token->next)
 		token->next->prev = token->prev;
 	else
 		token->next = NULL;
@@ -43,14 +43,14 @@ void token_del(t_token *token)
 	free(token);
 }
 
-void token_add_start(t_token **root, t_token *token)
+void	token_add_start(t_token **root, t_token *token)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
 	if (*root == NULL)
 	{
 		*root = token;
-		return;
+		return ;
 	}
 	tmp = *root;
 	tmp->prev = token;
@@ -58,11 +58,11 @@ void token_add_start(t_token **root, t_token *token)
 	*root = token;
 }
 
-void token_add_prev(t_token **root, t_token *token, t_token *new)
+void	token_add_prev(t_token **root, t_token *token, t_token *new)
 {
-	t_token *tmp;
+	t_token	*tmp;
 
-	if(token->prev)
+	if (token->prev)
 	{
 		tmp = token->prev;
 		tmp->next = new;
@@ -72,28 +72,4 @@ void token_add_prev(t_token **root, t_token *token, t_token *new)
 	}
 	else
 		token_add_start(root, new);
-}
-
-void token_add_next(t_token *token, t_token *new)
-{
-	t_token *tmp;
-
-	tmp = token->next;
-	token->next = new;
-	new->prev = token;
-	new->next = tmp;
-	if (tmp)
-		tmp->prev = new;
-}
-
-void token_list_printer(t_token *root)
-{
-	t_token *tmp;
-
-	tmp = root;
-	while (tmp)
-	{
-		printf("String: %s, Type: %u\n", tmp->str, tmp->type);
-		tmp = tmp->next;
-	}
 }
