@@ -1,6 +1,6 @@
 #include "mini.h"
 
-void	set_token_type(t_token *token)
+void	set_token_type(t_token *token, int *flag)
 {
 	if (ft_strcmp(token->str, "|") == 0)
 		token->type = PIPE;
@@ -12,6 +12,11 @@ void	set_token_type(t_token *token)
 		token->type = REDRR;
 	else if (ft_strcmp(token->str, "<<") == 0)
 		token->type = REDLL;
+	else if (*flag == 0 && token->type == NONE)
+	{
+		token->type = CMD;
+		*flag = 1;
+	}
 	else
 		token->type = ARG;
 }
@@ -44,19 +49,20 @@ void	token_arr_set_type(t_token **token_arr)
 {
 	int		i;
 	t_token	*token_root;
+	int		flag;
 
+	flag = 0;
 	i = 0;
 	while (token_arr[i])
 	{
 		token_root = token_arr[i];
-		token_root->type = CMD;
-		token_root = token_root->next;
 		while (token_root)
 		{
-			set_token_type(token_root);
+			set_token_type(token_root, &flag);
 			handle_redirection(&token_root);
 			token_root = token_root->next;
 		}
+		flag = 0;
 		i++;
 	}
 }

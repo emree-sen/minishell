@@ -8,6 +8,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include "../libft/libft.h"
+# include <fcntl.h>
 
 typedef enum e_token_type
 {
@@ -38,12 +39,6 @@ typedef struct s_variables
 	struct s_variables	*next;
 }	t_variables;
 
-typedef struct s_state
-{
-	int			status;
-	t_token		**token_arr;
-}	t_state;
-
 typedef struct s_dollar
 {
 	int			i;
@@ -53,6 +48,18 @@ typedef struct s_dollar
 	int			flag2;
 
 }	t_dollar;
+
+typedef struct s_state
+{
+	int			status;
+	t_token		**token_arr;
+	int 		arr_len;
+}	t_state;
+
+typedef struct s_heredocs
+{
+	int *heredoc_fds;
+}	t_heredocs;
 
 //hazırlık
 t_token		*token_new(char *str, t_token_type type);
@@ -126,7 +133,7 @@ void		process_tokens(t_token *start, t_token *current,
 t_token		**finalize_token_array(t_token **list_array, int size);
 t_token		**token_separate_by_pipe(t_token *token_root);
 // token listesini anlamlı parçalar olarak tanımlar
-void		set_token_type(t_token *token);
+void	set_token_type(t_token *token, int *flag);
 void		handle_redirection(t_token **token);
 void		token_arr_set_type(t_token **token_arr);
 
@@ -149,5 +156,12 @@ int			mixed_redir_two(char *input);
 int			mixed_redir_three(char *input);
 int			mixed_redir_four(char *input);
 int			last_arg_is_redir(char *input);
+
+
+// exec
+void 		state_arr_len_set(t_state *state);
+int 		*heredoc_create(t_state *state);
+void 		heredoc_setter(t_state *state, int *heredoc_fds);
+void		executor(t_state *state);
 
 #endif

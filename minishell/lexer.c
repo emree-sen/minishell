@@ -28,13 +28,15 @@ int main()
 		state.token_arr = token_separate_by_pipe(root);
 		token_arr_set_type(state.token_arr);
 
-		int i = 0;
-		printf("\n");
-		while(state.token_arr[i])
-		{
-			token_list_printer(state.token_arr[i]);
-			printf("\n");
-			i++;
-		}
+		// executor
+		executor(&state);		
+		//int i = 0;
+		//printf("\n");
+		// while(state.token_arr[i])
+		// {
+		// 	token_list_printer(state.token_arr[i]);
+		// 	printf("\n");
+		// 	i++;
+		// }
 	}
 }
