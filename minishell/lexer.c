@@ -29,7 +29,7 @@ int main()
 		token_arr_set_type(state.token_arr);
 
 		// executor
-		executor(&state);		
+		executor(&state, var_root);		
 		//int i = 0;
 		//printf("\n");
 		// while(state.token_arr[i])

@@ -9,6 +9,7 @@
 # include <readline/history.h>
 # include "../libft/libft.h"
 # include <fcntl.h>
+# include <termios.h>
 
 typedef enum e_token_type
 {
@@ -60,6 +61,22 @@ typedef struct s_heredocs
 {
 	int *heredoc_fds;
 }	t_heredocs;
+
+typedef struct s_exec
+{
+	char	*path; // -> /bin/ls
+	char	**args; // -> ["/bin/ls", "-l", "-a", NULL]
+	char	*input_file; // -> NULL, file.txt
+	char	*output_file; // -> NULL, file.txt
+	int		in_fd; // -> 0, 3
+	int		out_fd; // -> 1, 4
+	int		input_type; // -> file_input, herdoc, none
+	char	**heredocs; // -> {"a", "b", NULL}
+	int		heredoc_idx;
+	// int		err_val;
+	// char	*err_str;
+}	t_exec;
+// execve("/bin/ls", ["/bin/ls", "-l", "-a", NULL], envp);
 
 //hazırlık
 t_token		*token_new(char *str, t_token_type type);
@@ -161,7 +178,6 @@ int			last_arg_is_redir(char *input);
 // exec
 void 		state_arr_len_set(t_state *state);
 int 		*heredoc_create(t_state *state);
-void 		heredoc_setter(t_state *state, int *heredoc_fds);
-void		executor(t_state *state);
+void		executor(t_state *state, t_variables *var_root);
 
 #endif
