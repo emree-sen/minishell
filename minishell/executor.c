@@ -26,20 +26,6 @@ int	*heredoc_create(t_state *state)
 	}
 	return (heredoc_fds);
 }
-// char ** heredocs = {"a", "b"};
-// int in_fd = pipe_fd[0];
-// if input == heredoc?
-//    if heredoc == last_heredoc? -> not
-//        continue ;
-//    else
-//        break ;
-// else
-//    if curren_heredoc == last_heredoc -> not
-//        continue ;
-//    else
-//        write(pipe_fd[1], input, ft_strlen(input));
-//
-
 
 void	heredoc_setter(t_exec *exec)
 {
@@ -50,7 +36,7 @@ void	heredoc_setter(t_exec *exec)
 	if (pipe(pipe_fd) == -1)
 		exit(1);
 	exec->heredoc_idx = 0;
-	while (exec->heredocs[exec->heredoc_idx])
+	while (exec->heredocs != NULL && exec->heredocs[exec->heredoc_idx])
 	{
 		if (input)
 			free(input);
@@ -69,7 +55,11 @@ void	heredoc_setter(t_exec *exec)
 			if (exec->heredocs[exec->heredoc_idx + 1])
 				continue ;
 			else
+			{
 				write(pipe_fd[1], input, ft_strlen(input));
+				write(pipe_fd[1], "\n", 1);
+			}	
+
 		}
 	}
 	exec->in_fd = pipe_fd[0];
@@ -98,7 +88,7 @@ t_exec	**exec_create(t_state *state)
 		exec[i]->output_file = NULL;
 		exec[i]->in_fd = -1;
 		exec[i]->out_fd = -1;
-		exec[i]->input_type = -1;
+		exec[i]->output_type = -1;
 		exec[i]->heredocs = NULL;
 		exec[i]->heredoc_idx = 0;
 		i++;
@@ -220,14 +210,12 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 	t_exec	**exec;
 	t_token	*tmp;
 	int		heredoc_num;
-	// t_variables *var_tmp;	
 	exec = exec_create(state);
 	i = 0;
 	j = -1;
 	while (i < state->arr_len)
 	{
 		tmp = state->token_arr[i];
-		printf("j: %d\n", j);
 		j++;
 		while (tmp)
 		{
@@ -247,27 +235,25 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 				exec[j]->heredocs[exec[j]->heredoc_idx] = ft_strdup(tmp->str);
 				exec[j]->heredoc_idx++;
 			}
-			// else if (tmp->type == ARG)
-			// {
-			// 	//exec[j]->args = args_filler(tmp);
-			// }
-			// else if (tmp->type == REDR)
-			// {
-			// 	exec[j]->output_file = ft_strdup(tmp->next->str);
-			// 	exec[j]->out_fd = open(exec[j]->output_file,
-			//			O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			// }
-			// else if (tmp->type == REDRR)
-			// {
-			// 	exec[j]->output_file = ft_strdup(tmp->next->str);
-			// 	exec[j]->out_fd = open(exec[j]->output_file,
-			//			O_WRONLY | O_CREAT | O_APPEND, 0644);
-			// }
-			// else if (tmp->type == REDL)
-			// {
-			// 	exec[j]->input_file = ft_strdup(tmp->next->str);
-			// 	exec[j]->in_fd = open(exec[j]->input_file, O_RDONLY);
-			// }
+			else if (tmp->type == REDR)
+			{
+				exec[j]->output_file = ft_strdup(tmp->next->str);
+				exec[j]->output_type = REDR;
+				exec[j]->out_fd = open(exec[j]->output_file,
+						O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			}
+			else if (tmp->type == REDRR)
+			{
+				exec[j]->output_file = ft_strdup(tmp->next->str);
+				exec[j]->output_type = REDRR;
+				exec[j]->out_fd = open(exec[j]->output_file,
+						O_WRONLY | O_CREAT | O_APPEND, 0644);
+			}
+			else if (tmp->type == REDL)
+			{
+				exec[j]->input_file = ft_strdup(tmp->next->str);
+				exec[j]->in_fd = open(exec[j]->input_file, O_RDONLY);
+			}
 			tmp = tmp->next;
 		}
 		i++;
@@ -284,8 +270,9 @@ void	exec_print(t_exec **exec)
 	while (exec[i])
 	{
 		j = 0;
-		printf("path: %s\n", exec[i]->path);
-		while (exec[i]->args[j])
+		if (exec[i]->path != NULL)
+			printf("path: %s\n", exec[i]->path);
+		while (exec[i]->args != NULL && exec[i]->args[j])
 		{
 			if (exec[i]->args != NULL)
 				printf("args: %s\n", exec[i]->args[j]);
@@ -302,10 +289,72 @@ void	exec_print(t_exec **exec)
 	}
 }
 
+int **pds_filler(int **pds, t_state *state)
+{
+	int	i;
+
+	i = 0;
+	while (i < state->arr_len)
+	{
+		pds = malloc(sizeof(int *) * (state->arr_len + 1));
+		if (!pds)
+			exit(1);
+		while (i < state->arr_len)
+		{
+			pds[i] = malloc(sizeof(int) * 2);
+			if (!pds[i])
+				exit(1);
+			if (pipe(pds[i]) == -1)
+				exit(1);
+			i++;
+		}
+		pds[state->arr_len] = NULL;
+	}
+	return (pds);
+}
+
+void fd_closer(int **pds, int i, t_state *state)
+{
+	int j;
+
+	j = 0;
+	while (j < state->arr_len - 1)
+	{
+		if (j != i)
+			close(pds[j][0]);
+		if (j != i - 1)
+			close(pds[j][1]);
+		j++;
+	}
+}
+
+void fd_setter(int **pds, int i, t_state *state)
+{	
+	if (i == 0)
+	{
+		dup2(pds[i][1], 1);
+		close(pds[i][0]);
+	}
+	else if (i == state->arr_len - 1)
+	{
+		dup2(pds[i - 1][0], 0);
+		close(pds[i - 1][1]);
+	}
+	else
+	{
+		dup2(pds[i - 1][0], 0);
+		dup2(pds[i][1], 1);
+		close(pds[i - 1][1]);
+		close(pds[i][0]);
+	}
+	fd_closer(pds, i, state);
+}
+
+
 void	executor(t_state *state, t_variables *var_root)
 {
 	t_exec	**exec;
-
+	int **pds;
 	// int  *heredocs;
 	int i;
 
@@ -318,15 +367,34 @@ void	executor(t_state *state, t_variables *var_root)
 		heredoc_setter(exec[i]);
 		i++;
 	}
-	execve(exec[0]->path, exec[0]->args, NULL);
-	// heredocs = heredoc_create(state);
-	// heredoc_setter(state, heredocs);
-	// i = 0;
-	// if (state->arr_len == 1)
-	// 	//single_command_executor(state, heredocs);
-	// else
-	// {
-	// 	//set_pipes(state, heredocs);
-	// 	//multi_command_executor(state, heredocs);
-	// }
+
+	pds = NULL;
+	pds = pds_filler(pds, state);
+
+	pid_t	pid;
+	i = 0;
+	while (i < state->arr_len)
+	{
+		pid = fork();
+
+		if (pid < 0)
+			exit(1); // hata kodu
+		else if (pid == 0)
+		{
+			// child
+			fd_setter(pds, i, state);
+			if (exec[i]->in_fd != 1)
+				dup2(exec[i]->in_fd, 0);
+			if (exec[i]->out_fd != 1)
+				dup2(exec[i]->out_fd, 1);
+			execve(exec[i]->path, exec[i]->args, NULL);
+		}
+		else
+		{
+			// parent
+			printf("parent\n");
+		}
+	}	
 }
+
+

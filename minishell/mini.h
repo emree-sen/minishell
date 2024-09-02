@@ -70,7 +70,7 @@ typedef struct s_exec
 	char	*output_file; // -> NULL, file.txt
 	int		in_fd; // -> 0, 3
 	int		out_fd; // -> 1, 4
-	int		input_type; // -> file_input, herdoc, none
+	int		output_type; // -> file_input, herdoc, none
 	char	**heredocs; // -> {"a", "b", NULL}
 	int		heredoc_idx;
 	// int		err_val;
