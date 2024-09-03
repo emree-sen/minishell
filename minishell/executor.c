@@ -225,9 +225,10 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 				if (!exec[j]->path)
 				{
 					printf("command not found: %s\n", tmp->str);
-					exit(1);
 				}
-				exec[j]->args = args_filler(tmp, exec[j]->path);
+				else
+					exec[j]->args = args_filler(tmp, exec[j]->path);
+				
 			}
 			else if (tmp->type == HEREDOC)
 			{
@@ -352,7 +353,7 @@ void fd_setter(int **fds, int i, t_state *state)
 		close(fds[i - 1][1]);
 		close(fds[i][0]);
 	}
-	//fd_closer(fds, i, state);
+	fd_closer(fds, i, state);
 }
 
 void	mother_close_all_files(int **fds, t_state *state)
@@ -385,48 +386,68 @@ void	executor(t_state *state, t_variables *var_root)
 {
 	t_exec	**exec;
 	int **fds;
-	// int  *heredocs;
 	int i;
 
 	i = 0;
 	state_arr_len_set(state);
-	exec = NULL;
 	exec = exec_filler(state, var_root);
-	exec_print(exec);
+	//exec_print(exec);
 	while (exec[i])
 	{
 		heredoc_setter(exec[i]);
 		i++;
 	}
-
 	fds = NULL;
 	fds = fds_filler(fds, state);
+	pid_t	*pid;
 
-	i = 0;
-
-	pid_t	pid;
+	pid = malloc(sizeof(pid_t) * state->arr_len);
 	i = 0;
 	while (i < state->arr_len)
 	{
-		pid = fork();
+		pid[i] = fork();
 
-		if (pid < 0)
+		if (pid[i] < 0)
 			exit(1); // hata kodu
-		else if (pid == 0)
+		else if (pid[i] == 0)
 		{
-			// child
-			// if (exec[i]->in_fd != 1)
-			// 	dup2(exec[i]->in_fd, 0);
-			// if (exec[i]->out_fd != 1)
-			// 	dup2(exec[i]->out_fd, 1);
-			if (fds)
+			if (state->arr_len == 1)
+			{
+				if (exec[i]->output_type == REDR)
+					dup2(exec[i]->out_fd, 1);
+				else if (exec[i]->in_fd != -1)
+					dup2(exec[i]->in_fd, 0);
+			}
+			else if (state->arr_len > 1)
+			{
+
+				if (exec[i]->in_fd != -1)
+				{
+					dup2(exec[i]->in_fd, 0);
+					close(exec[i]->in_fd);
+				}
+				else if (exec[i]->out_fd != -1)
+				{
+					dup2(exec[i]->out_fd, 1);
+					close(exec[i]->out_fd);
+				}
 				fd_setter(fds, i, state);
-			execve(exec[i]->path, exec[i]->args, NULL);
+			}
+			if (exec[i]->path != NULL)
+				execve(exec[i]->path, exec[i]->args, NULL);
 		}
 		i++;
 	}	
+	i = 0;
 	mother_close_all_files(fds, state);
-	waitpid(pid, &state->status, 0);
+	while (i < state->arr_len)
+	{
+		if (i == state->arr_len - 1)
+			waitpid(pid[i], &state->status, 0);
+		else
+			waitpid(pid[i], NULL, 0);
+		i++;
+	}
 
 	// parent
 	wait_all_children(state->arr_len);
