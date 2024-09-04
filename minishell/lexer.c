@@ -13,11 +13,16 @@ int main()
 		t_token *root;
 		t_variables *var_root;
 		line = readline("minishell$ ");
+		if (!line)
+		{
+			printf("exit\n");
+			break ;
+		}
 		add_history(line);
 		var_root = dup_veriables(env);
 
-		if(ft_strlen(line) > 0)
-			check_the_syntax(line);
+		// if(ft_strlen(line) > 0)
+		// 	check_the_syntax(line);
 		var_root = dup_veriables(env);
 
 		root = str_to_token(line);
@@ -27,9 +32,10 @@ int main()
 		token_del_quote(root);
 		state.token_arr = token_separate_by_pipe(root);
 		token_arr_set_type(state.token_arr);
-
+		//token_list_printer(root);
 		// executor
 		executor(&state, var_root);
-		
+		free(line);
+
 	}
 }

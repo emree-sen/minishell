@@ -24,6 +24,13 @@ int	pass_any(char *str, int *ai, char any)
 		(*ai)++;
 	return (*ai);
 }
+void	is_null(char *str)
+{
+	if (!str)
+	{
+		str = ft_strdup("");
+	}
+}
 
 t_token	*str_to_token(char *str)
 {
@@ -34,10 +41,10 @@ t_token	*str_to_token(char *str)
 
 	i = 0;
 	root = NULL;
+	is_null(str);
 	str = ft_strtrim(str, " ");
 	while (str[i])
 	{
-		start = 0;
 		start = pass_any(str, &i, ' ');
 		while (str[i])
 		{
@@ -62,8 +69,8 @@ int	pass_str_pls(char *str, int i)
 	while (str[i])
 	{
 		toggle_quote(&flag, str[i]);
-		if (str[i] && (flag != -1 || \
-			(flag == -1 && (str[i] != '|' && str[i] != '>' && str[i] != '<'))))
+		if (str[i] && (flag != -1 || (flag == -1 && (str[i] != '|'
+						&& str[i] != '>' && str[i] != '<'))))
 			i++;
 		else
 			break ;

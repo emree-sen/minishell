@@ -58,18 +58,20 @@ void	heredoc_setter(t_exec *exec)
 			{
 				write(pipe_fd[1], input, ft_strlen(input));
 				write(pipe_fd[1], "\n", 1);
-			}	
-
+			}
 		}
 	}
-	exec->in_fd = pipe_fd[0];
+	if (exec->heredocs != NULL && exec->in_type == REDLL)
+		exec->in_fd = pipe_fd[0];
+	else
+		close(pipe_fd[0]);
 	close(pipe_fd[1]);
 	free(input);
 }
 
 t_exec	**exec_create(t_state *state)
 {
-	int	i;
+	int		i;
 	t_exec	**exec;
 
 	exec = malloc(sizeof(t_exec *) * (state->arr_len + 1));
@@ -91,6 +93,9 @@ t_exec	**exec_create(t_state *state)
 		exec[i]->output_type = -1;
 		exec[i]->heredocs = NULL;
 		exec[i]->heredoc_idx = 0;
+		exec[i]->err_str = NULL;
+		exec[i]->err_val = 0;
+		exec[i]->in_type = -1;
 		i++;
 	}
 	return (exec);
@@ -123,6 +128,20 @@ void	ft_free_split(char **arr)
 	free(arr);
 }
 
+int is_has_slash(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '/')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 char	*path_finder(char *cmd, t_variables *var_root)
 {
 	char	*path;
@@ -132,18 +151,28 @@ char	*path_finder(char *cmd, t_variables *var_root)
 
 	paths = ft_split(ft_getenv("PATH", var_root), ':');
 	i = 0;
-	while (paths[i])
+	if (is_has_slash(cmd))
 	{
-		tmp = ft_strjoin(paths[i], "/");
-		path = ft_strjoin(tmp, cmd);
-		free(tmp);
-		if (!access(path, F_OK))
+		if (!access(cmd, F_OK))
+			return (ft_strdup(cmd));
+		return (NULL);
+	}
+	else
+	{
+		while (paths[i])
 		{
-			ft_free_split(paths);
-			return (path);
+			tmp = ft_strjoin(paths[i], "/");
+			path = ft_strjoin(tmp, cmd);
+			if (ft_strcmp(tmp, path) != 0 && !access(path, F_OK))
+			{
+				ft_free_split(paths);
+				return (free(tmp), path);
+			}
+			free(tmp);
+			free(path);
+			i++;
 		}
-		free(path);
-		i++;
+	
 	}
 	ft_free_split(paths);
 	return (NULL);
@@ -210,6 +239,7 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 	t_exec	**exec;
 	t_token	*tmp;
 	int		heredoc_num;
+
 	exec = exec_create(state);
 	i = 0;
 	j = -1;
@@ -224,18 +254,19 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 				exec[j]->path = path_finder(tmp->str, var_root);
 				if (!exec[j]->path)
 				{
-					printf("command not found: %s\n", tmp->str);
+					exec[j]->err_val = 127;
+					exec[j]->err_str = ft_strdup("command not found");
 				}
 				else
 					exec[j]->args = args_filler(tmp, exec[j]->path);
-				
 			}
 			else if (tmp->type == HEREDOC)
 			{
 				if (exec[j]->heredocs == NULL)
 				{
 					heredoc_num = count_heredocs(tmp);
-					exec[j]->heredocs = malloc(sizeof(char *) * (heredoc_num + 1));
+					exec[j]->heredocs = malloc(sizeof(char *) * (heredoc_num
+								+ 1));
 					exec[j]->heredocs[heredoc_num] = NULL;
 				}
 				exec[j]->heredocs[exec[j]->heredoc_idx] = ft_strdup(tmp->str);
@@ -257,9 +288,12 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 			}
 			else if (tmp->type == REDL)
 			{
+				exec[j]->in_type = REDL;
 				exec[j]->input_file = ft_strdup(tmp->next->str);
 				exec[j]->in_fd = open(exec[j]->input_file, O_RDONLY);
 			}
+			else if (tmp->type == REDLL)
+				exec[j]->in_type = REDLL;
 			tmp = tmp->next;
 		}
 		i++;
@@ -291,16 +325,20 @@ void	exec_print(t_exec **exec)
 				printf("heredocs: %s\n", exec[i]->heredocs[j]);
 			j++;
 		}
+		printf("input_file: %s\n", exec[i]->input_file);
+		printf("in_fd: %d\n", exec[i]->in_fd);
+		printf("output_file: %s\n", exec[i]->output_file);
+		printf("out_fd: %d\n", exec[i]->out_fd);
 		i++;
 	}
 }
 
-int **fds_filler(int **fds, t_state *state)
+int	**fds_filler(int **fds, t_state *state)
 {
 	int	i;
 
 	i = 0;
-	if (state->arr_len == 1)
+	if (state->arr_len <= 1)
 		return (NULL);
 	fds = malloc(sizeof(int *) * (state->arr_len - 1));
 	if (!fds)
@@ -319,9 +357,9 @@ int **fds_filler(int **fds, t_state *state)
 	return (fds);
 }
 
-void fd_closer(int **fds, int i, t_state *state)
+void	fd_closer(int **fds, int i, t_state *state)
 {
-	int j;
+	int	j;
 
 	j = 0;
 	while (j < state->arr_len - 1)
@@ -334,27 +372,7 @@ void fd_closer(int **fds, int i, t_state *state)
 		j++;
 	}
 }
-void fd_setter(int **fds, int i, t_state *state)
-{
-	if (i == 0)
-	{
-		dup2(fds[i][1], 1);
-		close(fds[i][0]);
-	}
-	else if (i == state->arr_len - 1)
-	{
-		dup2(fds[i - 1][0], 0);
-		close(fds[i - 1][1]);
-	}
-	else
-	{
-		dup2(fds[i - 1][0], 0);
-		dup2(fds[i][1], 1);
-		close(fds[i - 1][1]);
-		close(fds[i][0]);
-	}
-	fd_closer(fds, i, state);
-}
+
 
 void	mother_close_all_files(int **fds, t_state *state)
 {
@@ -382,13 +400,216 @@ void	wait_all_children(int arr_len)
 	}
 }
 
+void	ft_print_exec_errors(t_exec **exec)
+{
+	int	i;
+
+	i = 0;
+	while (exec[i])
+	{
+		if (exec[i]->err_val != 0)
+			printf("%s\n", exec[i]->err_str);
+		i++;
+	}
+}
+
+char	**env_list_creator(t_variables *var_root)
+{
+	t_variables	*tmp;
+	char		**env;
+	int			i;
+
+	tmp = var_root;
+	i = 0;
+	while (tmp)
+	{
+		i++;
+		tmp = tmp->next;
+	}
+	env = malloc(sizeof(char *) * (i + 1));
+	if (!env)
+		exit(1);
+	i = 0;
+	tmp = var_root;
+	while (tmp)
+	{
+		env[i] = ft_strjoin(tmp->key, "=");
+		env[i] = ft_strjoin(env[i], tmp->value);
+		i++;
+		tmp = tmp->next;
+	}
+	env[i] = NULL;
+	return (env);
+}
+
+void single_command(t_exec **exec, int i)
+{
+	if (exec[i]->in_fd != -1)
+		dup2(exec[i]->in_fd, 0);
+	if (exec[i]->out_fd != -1)
+		dup2(exec[i]->out_fd, 1);
+}
+
+void	fd_setter_without_redr(int **fds, int i, t_state *state)
+{
+	if (i == 0)
+	{
+		dup2(fds[i][1], 1);
+		close(fds[i][0]);
+	}
+	else if (i == state->arr_len - 1)
+	{
+		dup2(fds[i - 1][0], 0);
+		close(fds[i - 1][1]);
+	}
+	else
+	{
+		dup2(fds[i - 1][0], 0);
+		dup2(fds[i][1], 1);
+		close(fds[i - 1][1]);
+		close(fds[i][0]);
+	}
+	fd_closer(fds, i, state);
+}
+
+void fd_setter_with_redr(t_exec **exec, int **fds, int i, t_state *state)
+{
+	if (i == 0)
+	{
+		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			close(fds[i][0]);
+			close(fds[i][1]);
+		}
+		else if (exec[i]->in_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			dup2(fds[i][1], 1);
+			close(fds[i][0]);
+		}
+		else if (exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			close(fds[i][1]);
+			close(fds[i][0]);
+		}
+		else
+		{
+			dup2(fds[i][1], 1);
+			close(fds[i][0]);
+		}
+	}
+	else if (i == state->arr_len - 1)
+	{
+		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			close(fds[i - 1][1]);
+			close(fds[i - 1][0]);
+		}
+		else if (exec[i]->in_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			close(fds[i - 1][1]);
+			close(fds[i - 1][0]);
+		}
+		else if (exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			dup2(fds[i - 1][0], 0);
+			close(fds[i - 1][1]);
+		}
+		else
+		{
+			dup2(fds[i - 1][0], 0);
+			close(fds[i - 1][1]);
+		}
+	}
+	else
+	{
+		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			close(fds[i - 1][1]);
+			close(fds[i - 1][0]);
+			close(fds[i][0]);
+			close(fds[i][1]);
+			}
+		else if (exec[i]->in_fd != -1)
+		{
+			dup2(exec[i]->in_fd, 0);
+			close(exec[i]->in_fd);
+			close(fds[i - 1][1]);
+			close(fds[i - 1][0]);
+			dup2(fds[i][1], 1);
+			close(fds[i][0]);
+		}
+		else if (exec[i]->out_fd != -1)
+		{
+			dup2(exec[i]->out_fd, 1);
+			close(exec[i]->out_fd);
+			dup2(fds[i - 1][0], 0);
+			close(fds[i - 1][1]);
+			close(fds[i][0]);
+			close(fds[i][1]);
+		}
+		else
+		{
+			dup2(fds[i - 1][0], 0);
+			dup2(fds[i][1], 1);
+			close(fds[i - 1][1]);
+			close(fds[i][0]);
+		}
+	}
+	fd_closer(fds, i, state);
+}
+
+void multi_command_without_redr(int **fds, int i, t_state *state)
+{
+	fd_setter_without_redr(fds, i, state);
+}
+
+void multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state)
+{
+	if (exec[i]->in_fd != -1)
+	{
+		dup2(exec[i]->in_fd, 0);
+		close(exec[i]->in_fd);
+	}
+	if (exec[i]->out_fd != -1)
+	{
+		dup2(exec[i]->out_fd, 1);
+		close(exec[i]->out_fd);
+	}
+	fd_setter_with_redr(exec, fds, i, state);
+}
+
+#include "errno.h"
+
 void	executor(t_state *state, t_variables *var_root)
 {
 	t_exec	**exec;
-	int **fds;
-	int i;
+	int		**fds;
+	int		i;
+	char	**env;
+	pid_t	*pid;
 
 	i = 0;
+	env = env_list_creator(var_root);
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
 	//exec_print(exec);
@@ -397,60 +618,49 @@ void	executor(t_state *state, t_variables *var_root)
 		heredoc_setter(exec[i]);
 		i++;
 	}
+	ft_print_exec_errors(exec);
 	fds = NULL;
-	fds = fds_filler(fds, state);
-	pid_t	*pid;
-
+	if (state->arr_len > 1)
+		fds = fds_filler(fds, state);
 	pid = malloc(sizeof(pid_t) * state->arr_len);
 	i = 0;
 	while (i < state->arr_len)
 	{
 		pid[i] = fork();
-
 		if (pid[i] < 0)
 			exit(1); // hata kodu
 		else if (pid[i] == 0)
 		{
 			if (state->arr_len == 1)
 			{
-				if (exec[i]->output_type == REDR)
-					dup2(exec[i]->out_fd, 1);
-				else if (exec[i]->in_fd != -1)
-					dup2(exec[i]->in_fd, 0);
+				single_command(exec, i);
 			}
 			else if (state->arr_len > 1)
 			{
-
-				if (exec[i]->in_fd != -1)
-				{
-					dup2(exec[i]->in_fd, 0);
-					close(exec[i]->in_fd);
-				}
-				else if (exec[i]->out_fd != -1)
-				{
-					dup2(exec[i]->out_fd, 1);
-					close(exec[i]->out_fd);
-				}
-				fd_setter(fds, i, state);
+				if (exec[i]->in_fd != -1 || exec[i]->out_fd != -1)
+					multi_command_with_redr(exec, i, fds, state);
+				else
+					multi_command_without_redr(fds, i, state);
 			}
-			if (exec[i]->path != NULL)
-				execve(exec[i]->path, exec[i]->args, NULL);
+			if (exec[i]->path == NULL)
+				exit(127);
+			execve(exec[i]->path, exec[i]->args, env);
+			exit(127);
 		}
 		i++;
-	}	
+	}
 	i = 0;
 	mother_close_all_files(fds, state);
 	while (i < state->arr_len)
 	{
 		if (i == state->arr_len - 1)
+		{
 			waitpid(pid[i], &state->status, 0);
-		else
-			waitpid(pid[i], NULL, 0);
+			if (WIFEXITED(state->status))
+				state->status = WEXITSTATUS(state->status);
+		}
+		waitpid(pid[i], NULL, 0);
 		i++;
 	}
-
 	// parent
-	wait_all_children(state->arr_len);
 }
-
-

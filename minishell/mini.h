@@ -11,6 +11,24 @@
 # include <fcntl.h>
 # include <termios.h>
 
+# define ERR_CMD_NOT_FOUND 127
+# define ERR_IS_A_DIRECTORY 126
+# define ERR_PERMISSION_DENIED 1261
+# define ERR_NUMERIC_ARG 255
+# define ERR_PIPE_INIT 124
+# define ERR_NOT_VALID_IDFR 11
+# define ERR_NOT_A_DIRECTORY 122
+# define ERR_NO_FILE_OR_DIR 1
+# define ERR_EMPTY_COMMAND 1271
+# define ERR_UNEXPECTED_TOKEN 258
+# define ERR_MALLOC 3
+# define ERR_UNCOMPLETED_REDIRECT 4
+# define SUCCESS 0
+
+# define BUILTIN 37
+# define YES_CMD 38
+# define NO_CMD 39
+
 typedef enum e_token_type
 {
 	NONE,
@@ -54,12 +72,12 @@ typedef struct s_state
 {
 	int			status;
 	t_token		**token_arr;
-	int 		arr_len;
+	int			arr_len;
 }	t_state;
 
 typedef struct s_heredocs
 {
-	int *heredoc_fds;
+	int			*heredoc_fds;
 }	t_heredocs;
 
 typedef struct s_exec
@@ -73,8 +91,10 @@ typedef struct s_exec
 	int		output_type; // -> file_input, herdoc, none
 	char	**heredocs; // -> {"a", "b", NULL}
 	int		heredoc_idx;
-	// int		err_val;
-	// char	*err_str;
+	int		in_type;
+
+	int		err_val;
+	char	*err_str;
 }	t_exec;
 // execve("/bin/ls", ["/bin/ls", "-l", "-a", NULL], envp);
 
@@ -150,7 +170,7 @@ void		process_tokens(t_token *start, t_token *current,
 t_token		**finalize_token_array(t_token **list_array, int size);
 t_token		**token_separate_by_pipe(t_token *token_root);
 // token listesini anlamlı parçalar olarak tanımlar
-void	set_token_type(t_token *token, int *flag);
+void		set_token_type(t_token *token, int *flag);
 void		handle_redirection(t_token **token);
 void		token_arr_set_type(t_token **token_arr);
 
@@ -174,10 +194,9 @@ int			mixed_redir_three(char *input);
 int			mixed_redir_four(char *input);
 int			last_arg_is_redir(char *input);
 
-
 // exec
-void 		state_arr_len_set(t_state *state);
-int 		*heredoc_create(t_state *state);
+void		state_arr_len_set(t_state *state);
+int			*heredoc_create(t_state *state);
 void		executor(t_state *state, t_variables *var_root);
 
 #endif
