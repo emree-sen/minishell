@@ -10,297 +10,6 @@ void	state_arr_len_set(t_state *state)
 	state->arr_len = i;
 }
 
-int	*heredoc_create(t_state *state)
-{
-	int	i;
-	int	*heredoc_fds;
-
-	heredoc_fds = malloc(sizeof(int) * state->arr_len);
-	if (!heredoc_fds)
-		exit(1);
-	i = 0;
-	while (i < state->arr_len)
-	{
-		heredoc_fds[i] = -37;
-		i++;
-	}
-	return (heredoc_fds);
-}
-
-void	heredoc_setter(t_exec *exec)
-{
-	int		pipe_fd[2];
-	char	*input;
-
-	input = NULL;
-	if (pipe(pipe_fd) == -1)
-		exit(1);
-	exec->heredoc_idx = 0;
-	while (exec->heredocs != NULL && exec->heredocs[exec->heredoc_idx])
-	{
-		if (input)
-			free(input);
-		input = readline("> ");
-		if (!input)
-			break ;
-		if (!ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
-		{
-			if (exec->heredocs[exec->heredoc_idx + 1])
-				exec->heredoc_idx++;
-			else
-				break ;
-		}
-		else
-		{
-			if (exec->heredocs[exec->heredoc_idx + 1])
-				continue ;
-			else
-			{
-				write(pipe_fd[1], input, ft_strlen(input));
-				write(pipe_fd[1], "\n", 1);
-			}
-		}
-	}
-	if (exec->heredocs != NULL && exec->in_type == REDLL)
-		exec->in_fd = pipe_fd[0];
-	else
-		close(pipe_fd[0]);
-	close(pipe_fd[1]);
-	free(input);
-}
-
-t_exec	**exec_create(t_state *state)
-{
-	int		i;
-	t_exec	**exec;
-
-	exec = malloc(sizeof(t_exec *) * (state->arr_len + 1));
-	if (!exec)
-		exit(1);
-	exec[state->arr_len] = NULL;
-	i = 0;
-	while (i < state->arr_len)
-	{
-		exec[i] = malloc(sizeof(t_exec));
-		if (!exec[i])
-			exit(1);
-		exec[i]->path = NULL;
-		exec[i]->args = NULL;
-		exec[i]->input_file = NULL;
-		exec[i]->output_file = NULL;
-		exec[i]->in_fd = -1;
-		exec[i]->out_fd = -1;
-		exec[i]->output_type = -1;
-		exec[i]->heredocs = NULL;
-		exec[i]->heredoc_idx = 0;
-		exec[i]->err_str = NULL;
-		exec[i]->err_val = 0;
-		exec[i]->in_type = -1;
-		i++;
-	}
-	return (exec);
-}
-
-char	*ft_getenv(char *key, t_variables *var_root)
-{
-	t_variables	*tmp;
-
-	tmp = var_root;
-	while (tmp)
-	{
-		if (!ft_strcmp(tmp->key, key))
-			return (tmp->value);
-		tmp = tmp->next;
-	}
-	return (NULL);
-}
-
-void	ft_free_split(char **arr)
-{
-	int	i;
-
-	i = 0;
-	while (arr[i])
-	{
-		free(arr[i]);
-		i++;
-	}
-	free(arr);
-}
-
-int is_has_slash(char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		if (str[i] == '/')
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-char	*path_finder(char *cmd, t_variables *var_root)
-{
-	char	*path;
-	char	*tmp;
-	char	**paths;
-	int		i;
-
-	paths = ft_split(ft_getenv("PATH", var_root), ':');
-	i = 0;
-	if (is_has_slash(cmd))
-	{
-		if (!access(cmd, F_OK))
-			return (ft_strdup(cmd));
-		return (NULL);
-	}
-	else
-	{
-		while (paths[i])
-		{
-			tmp = ft_strjoin(paths[i], "/");
-			path = ft_strjoin(tmp, cmd);
-			if (ft_strcmp(tmp, path) != 0 && !access(path, F_OK))
-			{
-				ft_free_split(paths);
-				return (free(tmp), path);
-			}
-			free(tmp);
-			free(path);
-			i++;
-		}
-	
-	}
-	ft_free_split(paths);
-	return (NULL);
-}
-
-int	arg_num_finder(t_token *tmp)
-{
-	int	i;
-
-	i = 0;
-	while (tmp)
-	{
-		if (tmp->type == ARG)
-			i++;
-		tmp = tmp->next;
-	}
-	return (i);
-}
-
-char	**args_filler(t_token *tmp, char *path)
-{
-	char	**args;
-	int		i;
-	int		arg_num;
-
-	arg_num = arg_num_finder(tmp);
-	args = malloc(sizeof(char *) * (arg_num + 2));
-	if (!args)
-		exit(1);
-	i = 0;
-	args[i] = ft_strdup(path);
-	i++;
-	while (tmp)
-	{
-		if (tmp->type == ARG)
-		{
-			args[i] = ft_strdup(tmp->str);
-			i++;
-		}
-		tmp = tmp->next;
-	}
-	args[i] = NULL;
-	return (args);
-}
-
-int	count_heredocs(t_token *tmp)
-{
-	int	i;
-
-	i = 0;
-	while (tmp)
-	{
-		if (tmp->type == HEREDOC)
-			i++;
-		tmp = tmp->next;
-	}
-	return (i);
-}
-
-t_exec	**exec_filler(t_state *state, t_variables *var_root)
-{
-	int		i;
-	int		j;
-	t_exec	**exec;
-	t_token	*tmp;
-	int		heredoc_num;
-
-	exec = exec_create(state);
-	i = 0;
-	j = -1;
-	while (i < state->arr_len)
-	{
-		tmp = state->token_arr[i];
-		j++;
-		while (tmp)
-		{
-			if (tmp->type == CMD)
-			{
-				exec[j]->path = path_finder(tmp->str, var_root);
-				if (!exec[j]->path)
-				{
-					exec[j]->err_val = 127;
-					exec[j]->err_str = ft_strdup("command not found");
-				}
-				else
-					exec[j]->args = args_filler(tmp, exec[j]->path);
-			}
-			else if (tmp->type == HEREDOC)
-			{
-				if (exec[j]->heredocs == NULL)
-				{
-					heredoc_num = count_heredocs(tmp);
-					exec[j]->heredocs = malloc(sizeof(char *) * (heredoc_num
-								+ 1));
-					exec[j]->heredocs[heredoc_num] = NULL;
-				}
-				exec[j]->heredocs[exec[j]->heredoc_idx] = ft_strdup(tmp->str);
-				exec[j]->heredoc_idx++;
-			}
-			else if (tmp->type == REDR)
-			{
-				exec[j]->output_file = ft_strdup(tmp->next->str);
-				exec[j]->output_type = REDR;
-				exec[j]->out_fd = open(exec[j]->output_file,
-						O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			}
-			else if (tmp->type == REDRR)
-			{
-				exec[j]->output_file = ft_strdup(tmp->next->str);
-				exec[j]->output_type = REDRR;
-				exec[j]->out_fd = open(exec[j]->output_file,
-						O_WRONLY | O_CREAT | O_APPEND, 0644);
-			}
-			else if (tmp->type == REDL)
-			{
-				exec[j]->in_type = REDL;
-				exec[j]->input_file = ft_strdup(tmp->next->str);
-				exec[j]->in_fd = open(exec[j]->input_file, O_RDONLY);
-			}
-			else if (tmp->type == REDLL)
-				exec[j]->in_type = REDLL;
-			tmp = tmp->next;
-		}
-		i++;
-	}
-	return (exec);
-}
-
 void	exec_print(t_exec **exec)
 {
 	int	i;
@@ -329,60 +38,6 @@ void	exec_print(t_exec **exec)
 		printf("in_fd: %d\n", exec[i]->in_fd);
 		printf("output_file: %s\n", exec[i]->output_file);
 		printf("out_fd: %d\n", exec[i]->out_fd);
-		i++;
-	}
-}
-
-int	**fds_filler(int **fds, t_state *state)
-{
-	int	i;
-
-	i = 0;
-	if (state->arr_len <= 1)
-		return (NULL);
-	fds = malloc(sizeof(int *) * (state->arr_len - 1));
-	if (!fds)
-		exit(1);
-	while (i < state->arr_len - 1)
-	{
-		fds[i] = malloc(sizeof(int) * 2);
-		if (!fds[i])
-			exit(1);
-		if (pipe(fds[i]) == -1)
-		{
-			exit(1);
-		}
-		i++;
-	}
-	return (fds);
-}
-
-void	fd_closer(int **fds, int i, t_state *state)
-{
-	int	j;
-
-	j = 0;
-	while (j < state->arr_len - 1)
-	{
-		if (j != i - 1 && j != i)
-		{
-			close(fds[j][0]);
-			close(fds[j][1]);
-		}
-		j++;
-	}
-}
-
-
-void	mother_close_all_files(int **fds, t_state *state)
-{
-	int	i;
-
-	i = 0;
-	while (i < state->arr_len - 1)
-	{
-		close(fds[i][0]);
-		close(fds[i][1]);
 		i++;
 	}
 }
@@ -433,8 +88,7 @@ char	**env_list_creator(t_variables *var_root)
 	tmp = var_root;
 	while (tmp)
 	{
-		env[i] = ft_strjoin(tmp->key, "=");
-		env[i] = ft_strjoin(env[i], tmp->value);
+		env[i] = ft_strdup(tmp->line);
 		i++;
 		tmp = tmp->next;
 	}
@@ -442,174 +96,36 @@ char	**env_list_creator(t_variables *var_root)
 	return (env);
 }
 
-void single_command(t_exec **exec, int i)
+void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_root, int i)
 {
-	if (exec[i]->in_fd != -1)
-		dup2(exec[i]->in_fd, 0);
-	if (exec[i]->out_fd != -1)
-		dup2(exec[i]->out_fd, 1);
+	if (exec[i]->cmd_type == BUILTIN)
+	{
+		// if (ft_strcmp(exec[i]->args[0], "echo") == 0)
+		// 	ft_echo(exec[i]->args);
+		// else if (ft_strcmp(exec[i]->args[0], "cd") == 0)
+		// 	ft_cd(exec[i]->args);
+		if (ft_strcmp(exec[i]->args[0], "pwd") == 0)
+		 	ft_pwd();
+		else if (ft_strcmp(exec[i]->args[0], "export") == 0)
+			ft_export(state, var_root, i);
+		else if (ft_strcmp(exec[i]->args[0], "unset") == 0)
+		 	ft_unset(var_root, state, i);
+		else if (ft_strcmp(exec[i]->args[0], "env") == 0)
+			ft_env(var_root);
+		// else if (ft_strcmp(exec[i]->args[0], "exit") == 0)
+		// 	ft_exit(exec[i]->args);
+	}
 }
-
-void	fd_setter_without_redr(int **fds, int i, t_state *state)
-{
-	if (i == 0)
-	{
-		dup2(fds[i][1], 1);
-		close(fds[i][0]);
-	}
-	else if (i == state->arr_len - 1)
-	{
-		dup2(fds[i - 1][0], 0);
-		close(fds[i - 1][1]);
-	}
-	else
-	{
-		dup2(fds[i - 1][0], 0);
-		dup2(fds[i][1], 1);
-		close(fds[i - 1][1]);
-		close(fds[i][0]);
-	}
-	fd_closer(fds, i, state);
-}
-
-void fd_setter_with_redr(t_exec **exec, int **fds, int i, t_state *state)
-{
-	if (i == 0)
-	{
-		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			close(fds[i][0]);
-			close(fds[i][1]);
-		}
-		else if (exec[i]->in_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			dup2(fds[i][1], 1);
-			close(fds[i][0]);
-		}
-		else if (exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			close(fds[i][1]);
-			close(fds[i][0]);
-		}
-		else
-		{
-			dup2(fds[i][1], 1);
-			close(fds[i][0]);
-		}
-	}
-	else if (i == state->arr_len - 1)
-	{
-		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			close(fds[i - 1][1]);
-			close(fds[i - 1][0]);
-		}
-		else if (exec[i]->in_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			close(fds[i - 1][1]);
-			close(fds[i - 1][0]);
-		}
-		else if (exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			dup2(fds[i - 1][0], 0);
-			close(fds[i - 1][1]);
-		}
-		else
-		{
-			dup2(fds[i - 1][0], 0);
-			close(fds[i - 1][1]);
-		}
-	}
-	else
-	{
-		if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			close(fds[i - 1][1]);
-			close(fds[i - 1][0]);
-			close(fds[i][0]);
-			close(fds[i][1]);
-			}
-		else if (exec[i]->in_fd != -1)
-		{
-			dup2(exec[i]->in_fd, 0);
-			close(exec[i]->in_fd);
-			close(fds[i - 1][1]);
-			close(fds[i - 1][0]);
-			dup2(fds[i][1], 1);
-			close(fds[i][0]);
-		}
-		else if (exec[i]->out_fd != -1)
-		{
-			dup2(exec[i]->out_fd, 1);
-			close(exec[i]->out_fd);
-			dup2(fds[i - 1][0], 0);
-			close(fds[i - 1][1]);
-			close(fds[i][0]);
-			close(fds[i][1]);
-		}
-		else
-		{
-			dup2(fds[i - 1][0], 0);
-			dup2(fds[i][1], 1);
-			close(fds[i - 1][1]);
-			close(fds[i][0]);
-		}
-	}
-	fd_closer(fds, i, state);
-}
-
-void multi_command_without_redr(int **fds, int i, t_state *state)
-{
-	fd_setter_without_redr(fds, i, state);
-}
-
-void multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state)
-{
-	if (exec[i]->in_fd != -1)
-	{
-		dup2(exec[i]->in_fd, 0);
-		close(exec[i]->in_fd);
-	}
-	if (exec[i]->out_fd != -1)
-	{
-		dup2(exec[i]->out_fd, 1);
-		close(exec[i]->out_fd);
-	}
-	fd_setter_with_redr(exec, fds, i, state);
-}
-
-#include "errno.h"
 
 void	executor(t_state *state, t_variables *var_root)
 {
 	t_exec	**exec;
 	int		**fds;
-	int		i;
 	char	**env;
 	pid_t	*pid;
+	int		i;
 
 	i = 0;
-	env = env_list_creator(var_root);
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
 	//exec_print(exec);
@@ -626,6 +142,8 @@ void	executor(t_state *state, t_variables *var_root)
 	i = 0;
 	while (i < state->arr_len)
 	{
+		if (state->arr_len == 1 && exec[i]->cmd_type == BUILTIN)
+			single_command_built_in(exec, state, var_root, i);
 		pid[i] = fork();
 		if (pid[i] < 0)
 			exit(1); // hata kodu
@@ -644,13 +162,14 @@ void	executor(t_state *state, t_variables *var_root)
 			}
 			if (exec[i]->path == NULL)
 				exit(127);
+			env = env_list_creator(var_root);
 			execve(exec[i]->path, exec[i]->args, env);
 			exit(127);
 		}
 		i++;
 	}
 	i = 0;
-	mother_close_all_files(fds, state);
+	close_all_fd(fds, state);
 	while (i < state->arr_len)
 	{
 		if (i == state->arr_len - 1)

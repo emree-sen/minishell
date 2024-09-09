@@ -2,16 +2,17 @@
 
 int main()
 {
+	t_state state;
+	extern char **environ;
+	char **env = environ;
+
+	char *line;
+	t_token *root;
+	t_variables *var_root;
+	var_root = dup_veriables(env);
 	while (1)
 	{
-		t_state state;
-		state.status = 0;
-		extern char **environ;
-		char **env = environ;
-
-		char *line;
-		t_token *root;
-		t_variables *var_root;
+		
 		line = readline("minishell$ ");
 		if (!line)
 		{
@@ -19,12 +20,6 @@ int main()
 			break ;
 		}
 		add_history(line);
-		var_root = dup_veriables(env);
-
-		// if(ft_strlen(line) > 0)
-		// 	check_the_syntax(line);
-		var_root = dup_veriables(env);
-
 		root = str_to_token(line);
 
 		token_extract_all_meta(&root);

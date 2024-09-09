@@ -24,6 +24,7 @@ t_variables	*dup_veriables(char **environ)
 		key = ft_substr(environ[i], 0, ft_strchr(environ[i], '=') - environ[i]);
 		value = ft_strdup(ft_strchr(environ[i], '=') + 1);
 		variables = variables_new(key, value);
+		variables->line = ft_strdup(environ[i]);
 		variables_add_last(&root, variables);
 	}
 	return (root);

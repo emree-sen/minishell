@@ -53,8 +53,10 @@ typedef struct s_token
 
 typedef struct s_variables
 {
+	char				*line;
 	char				*key;
 	char				*value;
+	struct s_variables	*prev;
 	struct s_variables	*next;
 }	t_variables;
 
@@ -92,6 +94,7 @@ typedef struct s_exec
 	char	**heredocs; // -> {"a", "b", NULL}
 	int		heredoc_idx;
 	int		in_type;
+	int 	cmd_type;
 
 	int		err_val;
 	char	*err_str;
@@ -110,6 +113,7 @@ void		token_add_start(t_token **root, t_token *token);
 t_variables	*variables_new(char *key, char *value);
 void		variables_list_printer(t_variables *root);
 void		variables_add_last(t_variables **root, t_variables *variables);
+void		variables_del(t_variables *var);
 
 int			pass_quote(char *str, int qi);
 int			pass_str(char *str, int si);
@@ -197,6 +201,35 @@ int			last_arg_is_redir(char *input);
 // exec
 void		state_arr_len_set(t_state *state);
 int			*heredoc_create(t_state *state);
+void		heredoc_setter(t_exec *exec);
+t_exec		**exec_create(t_state *state);
+void		ft_free_split(char **arr);
+int			is_has_slash(char *str);
+char		*ft_getenv(char *key, t_variables *var_root);
+char		*path_finder(char *cmd, t_variables *var_root);
+int			arg_num_finder(t_token *tmp);
+char		**args_filler(t_token *tmp, char *path);
+int			count_heredocs(t_token *tmp);
+t_exec		**exec_filler(t_state *state, t_variables *var_root);
+void		exec_print(t_exec **exec);
+int			**fds_filler(int **fds, t_state *state);
+void		fd_closer(int **fds, int i, t_state *state);
+void		close_all_fd(int **fds, t_state *state);
+void		wait_all_children(int arr_len);
+void		ft_print_exec_errors(t_exec **exec);
+char		**env_list_creator(t_variables *var_root);
+void		single_command(t_exec **exec, int i);
+void		fd_setter_without_redr(int **fds, int i, t_state *state);
+void		fd_setter_with_redr(t_exec **exec, int **fds, int i, t_state *state);
+void		multi_command_without_redr(int **fds, int i, t_state *state);
+void		multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state);
 void		executor(t_state *state, t_variables *var_root);
+void		exec_init(t_exec *exec);
+int 		is_built_in(t_token *tmp);
+void		ft_export(t_state *state, t_variables *var_root, int i);
+void		single_command_built_in(t_exec **exec, t_state *state, t_variables *var_root, int i);
+void		ft_env(t_variables *var_root);
+void		ft_unset(t_variables *var_root, t_state *state, int i);
+void 		ft_pwd();
 
 #endif

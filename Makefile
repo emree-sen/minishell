@@ -9,7 +9,9 @@ SRCS = minishell/lexer.c minishell/token.c minishell/token2.c minishell/set_type
  		minishell/quote_cleaner.c minishell/ext_meta.c minishell/after_space_cont.c \
 		minishell/ext_meta2.c minishell/split_dollar.c minishell/str_to_token.c \
 		minishell/syntax_check.c minishell/syntax_error.c minishell/pipe_redir_check.c \
-		minishell/mixed_redir_check.c minishell/executor.c
+		minishell/mixed_redir_check.c minishell/executor.c minishell/commands.c minishell/exec.c \
+		minishell/fds.c minishell/heredoc.c minishell/built_in.c minishell/exec_fill.c \
+
 OBJS = $(SRCS:.c=.o)
 
 all: $(LIBFT) $(NAME)
