@@ -3,11 +3,11 @@
 int	is_built_in(t_token *tmp)
 {
 
-	// if (ft_strcmp(tmp->str , "echo") == 0)
-	// 	return (1);
-	// if (ft_strcmp(tmp->str , "cd") == 0)
-	// 	return (1);
-	if (ft_strcmp(tmp->str , "pwd") == 0)
+	if (ft_strcmp(tmp->str , "echo") == 0)
+	 	return (1);
+	if (ft_strcmp(tmp->str , "cd") == 0)
+		return (1);
+	else if (ft_strcmp(tmp->str , "pwd") == 0)
 	 	return (1);
 	else if (ft_strcmp(tmp->str , "export") == 0)
 		return (1);
@@ -15,8 +15,8 @@ int	is_built_in(t_token *tmp)
 	 	return (1);
 	else if (ft_strcmp(tmp->str , "env") == 0)
 	 	return (1);
-	// else if (ft_strcmp(tmp->str , "exit") == 0)
-	// 	return (1);
+	else if (ft_strcmp(tmp->str , "exit") == 0)
+	 	return (1);
 	return (0);
 }
 

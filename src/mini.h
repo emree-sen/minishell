@@ -231,5 +231,8 @@ void		single_command_built_in(t_exec **exec, t_state *state, t_variables *var_ro
 void		ft_env(t_variables *var_root);
 void		ft_unset(t_variables *var_root, t_state *state, int i);
 void 		ft_pwd();
+void		ft_echo(char **args);
+void		ft_cd(char **args, t_state *state, t_variables *var_root);
+void		ft_exit(t_state *state, int i);
 
 #endif

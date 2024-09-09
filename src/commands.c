@@ -15,6 +15,7 @@ void single_command(t_exec **exec, int i)
 void multi_command_without_redr(int **fds, int i, t_state *state)
 {
 	fd_setter_without_redr(fds, i, state);
+	
 }
 
 void multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state)

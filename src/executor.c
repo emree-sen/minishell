@@ -100,11 +100,11 @@ void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_roo
 {
 	if (exec[i]->cmd_type == BUILTIN)
 	{
-		// if (ft_strcmp(exec[i]->args[0], "echo") == 0)
-		// 	ft_echo(exec[i]->args);
-		// else if (ft_strcmp(exec[i]->args[0], "cd") == 0)
-		// 	ft_cd(exec[i]->args);
-		if (ft_strcmp(exec[i]->args[0], "pwd") == 0)
+		if (ft_strcmp(exec[i]->args[0], "echo") == 0)
+		 	ft_echo(exec[i]->args);
+		else if (ft_strcmp(exec[i]->args[0], "cd") == 0)
+		 	ft_cd(exec[i]->args, state , var_root);
+		else if (ft_strcmp(exec[i]->args[0], "pwd") == 0)
 		 	ft_pwd();
 		else if (ft_strcmp(exec[i]->args[0], "export") == 0)
 			ft_export(state, var_root, i);
@@ -112,8 +112,8 @@ void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_roo
 		 	ft_unset(var_root, state, i);
 		else if (ft_strcmp(exec[i]->args[0], "env") == 0)
 			ft_env(var_root);
-		// else if (ft_strcmp(exec[i]->args[0], "exit") == 0)
-		// 	ft_exit(exec[i]->args);
+		else if (ft_strcmp(exec[i]->args[0], "exit") == 0)
+		 	ft_exit(state, i);
 	}
 }
 
@@ -143,7 +143,10 @@ void	executor(t_state *state, t_variables *var_root)
 	while (i < state->arr_len)
 	{
 		if (state->arr_len == 1 && exec[i]->cmd_type == BUILTIN)
+		{
 			single_command_built_in(exec, state, var_root, i);
+			break ;
+		}
 		pid[i] = fork();
 		if (pid[i] < 0)
 			exit(1); // hata kodu
@@ -156,9 +159,25 @@ void	executor(t_state *state, t_variables *var_root)
 			else if (state->arr_len > 1)
 			{
 				if (exec[i]->in_fd != -1 || exec[i]->out_fd != -1)
+				{
 					multi_command_with_redr(exec, i, fds, state);
+					if (exec[i]->cmd_type == BUILTIN)
+					{
+						single_command_built_in(exec, state, var_root, i);
+						i++;
+						continue ;
+					}
+				}
 				else
+				{
 					multi_command_without_redr(fds, i, state);
+					if (exec[i]->cmd_type == BUILTIN)
+					{
+						single_command_built_in(exec, state, var_root, i);
+						i++;
+						continue ;
+					}
+				}
 			}
 			if (exec[i]->path == NULL)
 				exit(127);
@@ -172,7 +191,7 @@ void	executor(t_state *state, t_variables *var_root)
 	close_all_fd(fds, state);
 	while (i < state->arr_len)
 	{
-		if (i == state->arr_len - 1)
+		if (exec[state->arr_len - 1]->cmd_type != BUILTIN && i == state->arr_len - 1)
 		{
 			waitpid(pid[i], &state->status, 0);
 			if (WIFEXITED(state->status))

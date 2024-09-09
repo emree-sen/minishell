@@ -1,16 +1,16 @@
-NAME = mini
+NAME = minishell
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -g #-fsanitize=address -g
 LIBFT_PATH = libft
 LIBFT = libft/libft.a
-SRCS = minishell/lexer.c minishell/token.c minishell/token2.c minishell/set_type.c \
-		minishell/token_sep_by_pipe.c minishell/token_sep_by_pipe2.c minishell/variables.c \
- 		minishell/quote_cleaner.c minishell/ext_meta.c minishell/after_space_cont.c \
-		minishell/ext_meta2.c minishell/split_dollar.c minishell/str_to_token.c \
-		minishell/syntax_check.c minishell/syntax_error.c minishell/pipe_redir_check.c \
-		minishell/mixed_redir_check.c minishell/executor.c minishell/commands.c minishell/exec.c \
-		minishell/fds.c minishell/heredoc.c minishell/built_in.c minishell/exec_fill.c \
+SRCS = src/lexer.c src/token.c src/token2.c src/set_type.c \
+		src/token_sep_by_pipe.c src/token_sep_by_pipe2.c src/variables.c \
+ 		src/quote_cleaner.c src/ext_meta.c src/after_space_cont.c \
+		src/ext_meta2.c src/split_dollar.c src/str_to_token.c \
+		src/syntax_check.c src/syntax_error.c src/pipe_redir_check.c \
+		src/mixed_redir_check.c src/executor.c src/commands.c src/exec.c \
+		src/fds.c src/heredoc.c src/built_in.c src/exec_fill.c \
 
 OBJS = $(SRCS:.c=.o)
 
