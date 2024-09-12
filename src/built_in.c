@@ -1,33 +1,56 @@
 #include "mini.h"
 
-// export 
+void new_variable_adder(t_variables *var_root, char *key, char *value)
+{
+	t_variables	*new;
+
+	new = variables_new(key, value);
+	variables_add_last(&var_root, new);
+}
+
+int	is_alphanumericorunderscore(char *str)
+{
+	int	i;
+
+	i = 0;
+	if (ft_isalpha(str[i]) || str[i] == '_')
+	{
+		i++;
+		while (str[i] && str[i] != '=')
+		{
+			if (!ft_isalnum(str[i]) && str[i] != '_')
+				return (1);
+			i++;
+		}
+		return (0);
+	}
+	return (1);
+}
 
 void	ft_export(t_state *state, t_variables *var_root, int i)
 {
-	t_variables	*new;
-	int		flag;
 	t_token	*tmp;
 
 	tmp = state->token_arr[i];
-	flag = 0;
 	while (tmp)
 	{
 		if (tmp->type == ARG)
 		{
-			if (ft_isalpha(tmp->str[0]) || tmp->str[0] == '_')
+			if (!ft_isdigit(tmp->str[0]) && is_alphanumericorunderscore(tmp->str) == 0)
 			{
 				if (ft_strchr(tmp->str, '='))
-				{
-					new = variables_new(ft_substr(tmp->str, 0, ft_strchr(tmp->str, '=') - tmp->str),
-						ft_substr(tmp->str, ft_strchr(tmp->str, '=') - tmp->str + 1, ft_strlen(tmp->str)));
-					new->line = ft_strdup(tmp->str);
-					variables_add_last(&var_root, new);
-				}
+					new_variable_adder(var_root, ft_substr(tmp->str, 0,
+							ft_strchr(tmp->str, '=') - tmp->str),
+						ft_substr(tmp->str,
+							ft_strchr(tmp->str, '=') - tmp->str + 1,
+							ft_strlen(tmp->str)));
 			}
 			else
 			{
-				printf("minishell: export: `%s': not a valid identifier\n", tmp->str);
-				state->status = ERR_NOT_VALID_IDFR;
+				write(2, "minishell: export: `", 20);
+				write(2, tmp->str, ft_strlen(tmp->str));
+				write(2, "': not a valid identifier\n", 26);
+				state->status = 1;
 			}
 		}
 		tmp = tmp->next;
@@ -158,7 +181,6 @@ void env_node_updater(t_variables *var_root, char *key, char *value)
 		variables_add_last(&var_root, tmp);
 	}
 }
-#include "sys/stat.h"
 
 void ft_cd(char **args, t_state *state, t_variables *var_root)
 {
@@ -178,17 +200,16 @@ void ft_cd(char **args, t_state *state, t_variables *var_root)
 			return ;
 		}
 	}
-	#include "errno.h"
 	if (args[1])
 	{
 		if (chdir(args[1]) == -1)
 		{
-			if (buf.st_mode & S_IFDIR)
-				printf("minishell: cd: %s: %s\n", args[1], strerror(EACCES));
+			if (access(args[1], F_OK) == -1)
+				printf_spesific_error(ENOENT, args[1]);
+			else if (buf.st_mode & S_IFDIR)
+				printf_spesific_error(EACCES, args[1]);
 			else if (buf.st_mode & S_IFREG)
-				printf("minishell: cd: %s: %s\n", args[1], strerror(ENOTDIR));
-			else
-				printf("minishell: cd: %s: %s\n", args[1], strerror(ENOENT));
+				printf_spesific_error(ENOTDIR, args[1]);
 			state->status = 1;
 		}
 		else
@@ -210,6 +231,24 @@ int ft_arr_len(t_token *tmp)
 	return (len);
 }
 
+int	is_numeric(char *str)
+{
+	int	i;
+
+	i = 0;
+	if (str[i] == '-' || str[i] == '+')
+		i++;
+	if (!str[i])
+		return (1);
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 void ft_exit(t_state *state, int i)
 {
 	t_token	*tmp;
@@ -219,7 +258,7 @@ void ft_exit(t_state *state, int i)
 	len = ft_arr_len(tmp);
 	if (len > 2)
 	{
-		printf("minishell: exit: too many arguments\n");
+		write(2, "minishell: exit: too many arguments\n", 36);
 		state->status = 1;
 		exit(state->status);
 	}
@@ -227,18 +266,22 @@ void ft_exit(t_state *state, int i)
 	{
 		if (tmp->next->type == ARG)
 		{
-			if (ft_isdigit(tmp->next->str[0]))
+			if (is_numeric(tmp->next->str) == 0)
 			{
 				state->status = ft_atoi(tmp->next->str);
+				write(2, "exit\n", 5);
 			}
 			else
 			{
-				printf("minishell: exit: %s: numeric argument required\n", tmp->next->str);
+				printf_spesific_error(ERR_NUMERIC_ARG, tmp->next->str);
 				state->status = ERR_NUMERIC_ARG;
 			}
 			exit(state->status);
 		}
 	}
 	else
+	{
+		state->status = 0;
 		exit(state->status);
+	}
 }

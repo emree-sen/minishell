@@ -10,6 +10,8 @@
 # include "../libft/libft.h"
 # include <fcntl.h>
 # include <termios.h>
+# include "sys/stat.h"
+# include "errno.h"
 
 # define ERR_CMD_NOT_FOUND 127
 # define ERR_IS_A_DIRECTORY 126
@@ -28,6 +30,8 @@
 # define BUILTIN 37
 # define YES_CMD 38
 # define NO_CMD 39
+
+# define M "minishell: "
 
 typedef enum e_token_type
 {
@@ -121,7 +125,7 @@ int			pass_str_pls(char *str, int i);
 int			pass_any(char *str, int *ai, char any);
 
 void		toggle_quote(int *quote, char c);
-void		toggle_single_quote(int *quote, char c, int *dquote);
+void		toggle_single_quote(int *quote, char c, int *fl);
 int			is_only_quote(char *str);
 //stryi alıp GERÇEK boşluklara göre link list'e yerleştirecek, halkın adamı!
 // tokeni fonksiyonda oluştur. 
@@ -216,7 +220,7 @@ int			**fds_filler(int **fds, t_state *state);
 void		fd_closer(int **fds, int i, t_state *state);
 void		close_all_fd(int **fds, t_state *state);
 void		wait_all_children(int arr_len);
-void		ft_print_exec_errors(t_exec **exec);
+void		ft_print_exec_errors(t_exec **exec, t_state *state);
 char		**env_list_creator(t_variables *var_root);
 void		single_command(t_exec **exec, int i);
 void		fd_setter_without_redr(int **fds, int i, t_state *state);
@@ -234,5 +238,6 @@ void 		ft_pwd();
 void		ft_echo(char **args);
 void		ft_cd(char **args, t_state *state, t_variables *var_root);
 void		ft_exit(t_state *state, int i);
+void	printf_spesific_error(int err_type, char *str);
 
 #endif

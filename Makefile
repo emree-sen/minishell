@@ -11,6 +11,7 @@ SRCS = src/lexer.c src/token.c src/token2.c src/set_type.c \
 		src/syntax_check.c src/syntax_error.c src/pipe_redir_check.c \
 		src/mixed_redir_check.c src/executor.c src/commands.c src/exec.c \
 		src/fds.c src/heredoc.c src/built_in.c src/exec_fill.c \
+		src/ft_error.c
 
 OBJS = $(SRCS:.c=.o)
 

@@ -55,7 +55,7 @@ void	wait_all_children(int arr_len)
 	}
 }
 
-void	ft_print_exec_errors(t_exec **exec)
+void	ft_print_exec_errors(t_exec **exec, t_state *state)
 {
 	int	i;
 
@@ -63,7 +63,23 @@ void	ft_print_exec_errors(t_exec **exec)
 	while (exec[i])
 	{
 		if (exec[i]->err_val != 0)
-			printf("%s\n", exec[i]->err_str);
+		{
+			write(2, "minishell: ", 11);
+			if (exec[i]->err_val == 1)
+			{
+				write(2, exec[i]->err_str, ft_strlen(exec[i]->err_str));
+				write(2, "\n", 1);			
+			}
+			else if (exec[i]->err_val == 1261)
+			{
+				write(2, "Permission denied\n", 19);
+			}
+			else if (exec[i]->err_val == 1271)
+			{
+				write(2, state->token_arr[i]->str, ft_strlen(state->token_arr[i]->str));
+				write(2, ": command not found\n", 20);
+			}
+		}
 		i++;
 	}
 }
@@ -113,8 +129,20 @@ void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_roo
 		else if (ft_strcmp(exec[i]->args[0], "env") == 0)
 			ft_env(var_root);
 		else if (ft_strcmp(exec[i]->args[0], "exit") == 0)
-		 	ft_exit(state, i);
+		  	ft_exit(state, i);
 	}
+}
+
+void exit_num(int ex_num)
+{
+	if (ex_num == 127)
+		exit(127);
+	else if (ex_num == 1261)
+		exit(1261);
+	else if (ex_num == 1271)
+		exit(127);
+	else
+		exit(1);
 }
 
 void	executor(t_state *state, t_variables *var_root)
@@ -128,13 +156,13 @@ void	executor(t_state *state, t_variables *var_root)
 	i = 0;
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
-	//exec_print(exec);
+	// exec_print(exec);
 	while (exec[i])
 	{
 		heredoc_setter(exec[i]);
 		i++;
 	}
-	ft_print_exec_errors(exec);
+	ft_print_exec_errors(exec, state);
 	fds = NULL;
 	if (state->arr_len > 1)
 		fds = fds_filler(fds, state);
@@ -144,6 +172,11 @@ void	executor(t_state *state, t_variables *var_root)
 	{
 		if (state->arr_len == 1 && exec[i]->cmd_type == BUILTIN)
 		{
+			if (exec[i]->err_val != 0)
+			{
+				state->status = 1;
+				break;
+			}
 			single_command_built_in(exec, state, var_root, i);
 			break ;
 		}
@@ -154,10 +187,21 @@ void	executor(t_state *state, t_variables *var_root)
 		{
 			if (state->arr_len == 1)
 			{
+				if (exec[i]->err_val != 0)
+				{
+					close_all_fd(fds, state);
+					exit_num(exec[i]->err_val);
+				}
 				single_command(exec, i);
 			}
 			else if (state->arr_len > 1)
 			{
+				if (exec[i]->err_val != 0)
+				{
+					// printf("1\n");
+					close_all_fd(fds, state);
+					exit_num(exec[i]->err_val);
+				}
 				if (exec[i]->in_fd != -1 || exec[i]->out_fd != -1)
 				{
 					multi_command_with_redr(exec, i, fds, state);
@@ -165,7 +209,7 @@ void	executor(t_state *state, t_variables *var_root)
 					{
 						single_command_built_in(exec, state, var_root, i);
 						i++;
-						continue ;
+						exit(0);
 					}
 				}
 				else
@@ -175,7 +219,7 @@ void	executor(t_state *state, t_variables *var_root)
 					{
 						single_command_built_in(exec, state, var_root, i);
 						i++;
-						continue ;
+						exit(0);
 					}
 				}
 			}

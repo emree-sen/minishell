@@ -16,8 +16,75 @@ int	is_built_in(t_token *tmp)
 	else if (ft_strcmp(tmp->str , "env") == 0)
 	 	return (1);
 	else if (ft_strcmp(tmp->str , "exit") == 0)
-	 	return (1);
+	  	return (1);
 	return (0);
+}
+
+void	init_heredoc(t_token *tmp, t_exec *exec)
+{
+	int	heredoc_num;
+
+	if (exec->heredocs == NULL)
+		{
+			heredoc_num = count_heredocs(tmp);
+			exec->heredocs = malloc(sizeof(char *) * (heredoc_num
+						+ 1));
+			exec->heredocs[heredoc_num] = NULL;
+		}
+		exec->heredocs[exec->heredoc_idx] = ft_strdup(tmp->str);
+		exec->heredoc_idx++;
+}
+
+void	init_redr(t_token *tmp, t_exec *exec)
+{
+	exec->output_file = ft_strdup(tmp->next->str);
+	exec->output_type = REDR;
+	exec->out_fd = open(exec->output_file,
+			O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	if (exec->out_fd == -1)
+	{
+		exec->err_val = 1;
+		exec->err_str = ft_strdup(strerror(errno));
+	}
+}
+
+void	init_redrr(t_token *tmp, t_exec *exec)
+{
+	exec->output_file = ft_strdup(tmp->next->str);
+	exec->output_type = REDRR;
+	exec->out_fd = open(exec->output_file,
+			O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (exec->out_fd == -1)
+	{
+		exec->err_val = 1;
+		exec->err_str = ft_strdup(strerror(errno));
+	}
+}
+
+void	init_redll(t_token *tmp, t_exec *exec)
+{
+	exec->in_type = REDLL;
+	exec->input_file = ft_strdup(tmp->next->str);
+	exec->in_fd = open(exec->input_file, O_RDONLY);
+	if (exec->in_fd == -1)
+	{
+		exec->err_val = 1;
+		exec->err_str = ft_strdup(strerror(errno));
+	}
+}
+
+void	init_redirection(t_token *tmp, t_exec *exec)
+{
+	if (tmp->type == HEREDOC)
+		init_heredoc(tmp, exec);
+	else if (tmp->type == REDR)
+		init_redr(tmp, exec);
+	else if (tmp->type == REDRR)
+		init_redrr(tmp, exec);
+	else if (tmp->type == REDL)
+		init_redll(tmp, exec);
+	else if (tmp->type == REDLL)
+		exec->in_type = REDLL;
 }
 
 t_exec	**exec_filler(t_state *state, t_variables *var_root)
@@ -26,7 +93,6 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 	int		j;
 	t_exec	**exec;
 	t_token	*tmp;
-	int		heredoc_num;
 
 	exec = exec_create(state);
 	i = 0;
@@ -50,47 +116,14 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 					exec[j]->path = path_finder(tmp->str, var_root);
 					if (!exec[j]->path)
 					{
-						exec[j]->err_val = 127;
+						exec[j]->err_val = 1271;
 						exec[j]->err_str = ft_strdup("command not found");
 					}
 					else
 						exec[j]->args = args_filler(tmp, exec[j]->path);
 				}
 			}
-			else if (tmp->type == HEREDOC)
-			{
-				if (exec[j]->heredocs == NULL)
-				{
-					heredoc_num = count_heredocs(tmp);
-					exec[j]->heredocs = malloc(sizeof(char *) * (heredoc_num
-								+ 1));
-					exec[j]->heredocs[heredoc_num] = NULL;
-				}
-				exec[j]->heredocs[exec[j]->heredoc_idx] = ft_strdup(tmp->str);
-				exec[j]->heredoc_idx++;
-			}
-			else if (tmp->type == REDR)
-			{
-				exec[j]->output_file = ft_strdup(tmp->next->str);
-				exec[j]->output_type = REDR;
-				exec[j]->out_fd = open(exec[j]->output_file,
-						O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			}
-			else if (tmp->type == REDRR)
-			{
-				exec[j]->output_file = ft_strdup(tmp->next->str);
-				exec[j]->output_type = REDRR;
-				exec[j]->out_fd = open(exec[j]->output_file,
-						O_WRONLY | O_CREAT | O_APPEND, 0644);
-			}
-			else if (tmp->type == REDL)
-			{
-				exec[j]->in_type = REDL;
-				exec[j]->input_file = ft_strdup(tmp->next->str);
-				exec[j]->in_fd = open(exec[j]->input_file, O_RDONLY);
-			}
-			else if (tmp->type == REDLL)
-				exec[j]->in_type = REDLL;
+			init_redirection(tmp, exec[j]);
 			tmp = tmp->next;
 		}
 		i++;
