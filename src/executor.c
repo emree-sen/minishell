@@ -135,6 +135,7 @@ void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_roo
 
 void exit_num(int ex_num)
 {
+	// printf("ex_num: %d\n", ex_num);
 	if (ex_num == 127)
 		exit(127);
 	else if (ex_num == 1261)
@@ -198,7 +199,7 @@ void	executor(t_state *state, t_variables *var_root)
 			{
 				if (exec[i]->err_val != 0)
 				{
-					// printf("1\n");
+					// printf("err_val: %d\n", exec[i]->err_val);
 					close_all_fd(fds, state);
 					exit_num(exec[i]->err_val);
 				}
@@ -235,8 +236,9 @@ void	executor(t_state *state, t_variables *var_root)
 	close_all_fd(fds, state);
 	while (i < state->arr_len)
 	{
-		if (exec[state->arr_len - 1]->cmd_type != BUILTIN && i == state->arr_len - 1)
+		if (i == state->arr_len - 1)
 		{
+			// printf("pid: %d\n", pid[i]);
 			waitpid(pid[i], &state->status, 0);
 			if (WIFEXITED(state->status))
 				state->status = WEXITSTATUS(state->status);

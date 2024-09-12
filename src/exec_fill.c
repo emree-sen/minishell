@@ -77,13 +77,13 @@ void	init_redirection(t_token *tmp, t_exec *exec)
 {
 	if (tmp->type == HEREDOC)
 		init_heredoc(tmp, exec);
-	else if (tmp->type == REDR)
+	else if (tmp->type == REDR && exec->err_val == 0)
 		init_redr(tmp, exec);
-	else if (tmp->type == REDRR)
+	else if (tmp->type == REDRR && exec->err_val == 0)
 		init_redrr(tmp, exec);
-	else if (tmp->type == REDL)
+	else if (tmp->type == REDL && exec->err_val == 0)
 		init_redll(tmp, exec);
-	else if (tmp->type == REDLL)
+	else if (tmp->type == REDLL && exec->err_val == 0)
 		exec->in_type = REDLL;
 }
 
