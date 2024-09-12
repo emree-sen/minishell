@@ -151,6 +151,7 @@ void exit_num(int ex_num)
 		exit(1);
 }
 
+
 void	executor(t_state *state, t_variables *var_root)
 {
 	t_exec	**exec;
@@ -163,7 +164,8 @@ void	executor(t_state *state, t_variables *var_root)
 	i = 0;
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
-	// exec_print(exec);
+	//exec_print(exec);
+	
 	while (exec[i])
 	{
 		heredoc_setter(exec[i]);

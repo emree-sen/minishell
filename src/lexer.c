@@ -27,7 +27,6 @@ int main()
 		token_del_quote(root);
 		state.token_arr = token_separate_by_pipe(root);
 		token_arr_set_type(state.token_arr);
-		//token_list_printer(root);
 		// executor
 		executor(&state, var_root);
 		free(line);

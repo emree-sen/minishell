@@ -30,8 +30,8 @@ t_variables	*dup_veriables(char **environ)
 	return (root);
 }
 
-char	*token_value_finder(t_token *tmp,
-	t_dollar *dollar, t_variables *var_root)
+char	*token_value_finder(t_token *tmp, t_dollar *dollar,
+		t_variables *var_root)
 {
 	int			start;
 	int			end;
@@ -46,11 +46,14 @@ char	*token_value_finder(t_token *tmp,
 		end++;
 	else
 	{
-		while (tmp->str[end] && (ft_isalnum(tmp->str[end]) || \
-			tmp->str[end] == '_' || tmp->str[end] == '?'))
+		while (tmp->str[end] && (ft_isalnum(tmp->str[end])
+				|| tmp->str[end] == '_'))
 			end++;
 	}
-	dollar->key = ft_substr(tmp->str, start + 1, end - start - 1);
+	if (tmp->str[end] != '?')
+		dollar->key = ft_substr(tmp->str, start + 1, end - start - 1);
+	else
+		dollar->key = ft_strdup("?");
 	var_tmp = var_root;
 	while (var_tmp)
 	{
@@ -60,26 +63,29 @@ char	*token_value_finder(t_token *tmp,
 	return (value);
 }
 
-void	token_split_dollars(t_token **token_root,
-		t_variables *var_root, t_state *state)
+void	token_split_dollars(t_token **token_root, t_variables *var_root,
+		t_state *state)
 {
 	t_token		*tmp;
-	t_dollar	dllr;
+	t_dollar	d;
 
-	dllr.value = NULL;
-	dllr.flag = -1;
-	dllr.flag2 = -1;
+	d.value = NULL;
+	d.flag = -1;
+	d.flag2 = -1;
 	tmp = *token_root;
 	while (tmp)
 	{
-		dllr.i = -1;
-		while (tmp->str[++dllr.i])
+		d.i = -1;
+		while (tmp->str[++d.i])
 		{
-			toggle_single_quote(&dllr.flag, tmp->str[dllr.i], &dllr.flag2);
-			if (dllr.flag == -1 && tmp->str[dllr.i] == '$')
+			toggle_single_quote(&d.flag, tmp->str[d.i], &d.flag2);
+			if (d.flag == -1 && tmp->str[d.i] == '$' && tmp->str[d.i
+					+ 1] != '\"' && tmp->str[d.i + 1] != '\'' && tmp->str[d.i
+					+ 1] != '\0' && tmp->str[d.i + 1] != '$' && tmp->str[d.i
+					+ 1] != ' ')
 			{
-				dllr.value = token_value_finder(tmp, &dllr, var_root);
-				token_replace_value(&tmp, &dllr, &dllr.i, state);
+				d.value = token_value_finder(tmp, &d, var_root);
+				token_replace_value(&tmp, &d, &d.i, state);
 			}
 		}
 		tmp = tmp->next;
@@ -87,8 +93,8 @@ void	token_split_dollars(t_token **token_root,
 	token_extract_spaces(token_root);
 }
 
-void	token_replace_value(t_token **str, t_dollar *dollar,
-		int *i, t_state *state)
+void	token_replace_value(t_token **str, t_dollar *dollar, int *i,
+		t_state *state)
 {
 	int		end;
 	char	*left;
