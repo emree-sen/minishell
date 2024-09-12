@@ -79,6 +79,11 @@ void	ft_print_exec_errors(t_exec **exec, t_state *state)
 				write(2, state->token_arr[i]->str, ft_strlen(state->token_arr[i]->str));
 				write(2, ": command not found\n", 20);
 			}
+			else if (exec[i]->err_val == ERR_IS_A_DIRECTORY)
+			{
+				write(2, state->token_arr[i]->str, ft_strlen(state->token_arr[i]->str));
+				write(2, ": Is a directory\n", 18);
+			}
 		}
 		i++;
 	}
@@ -138,8 +143,8 @@ void exit_num(int ex_num)
 	// printf("ex_num: %d\n", ex_num);
 	if (ex_num == 127)
 		exit(127);
-	else if (ex_num == 1261)
-		exit(1261);
+	else if (ex_num == 126 || ex_num == 1261)
+		exit(126);
 	else if (ex_num == 1271)
 		exit(127);
 	else
@@ -153,6 +158,7 @@ void	executor(t_state *state, t_variables *var_root)
 	char	**env;
 	pid_t	*pid;
 	int		i;
+	int		tmp_fd;
 
 	i = 0;
 	state_arr_len_set(state);
@@ -178,7 +184,12 @@ void	executor(t_state *state, t_variables *var_root)
 				state->status = 1;
 				break;
 			}
+			tmp_fd = dup(1);
+			if (exec[i]->out_fd != -1)
+				dup2(exec[i]->out_fd, 1);
 			single_command_built_in(exec, state, var_root, i);
+			if (exec[i]->out_fd != -1)
+				dup2(tmp_fd, 1);
 			break ;
 		}
 		pid[i] = fork();

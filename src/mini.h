@@ -210,7 +210,7 @@ t_exec		**exec_create(t_state *state);
 void		ft_free_split(char **arr);
 int			is_has_slash(char *str);
 char		*ft_getenv(char *key, t_variables *var_root);
-char		*path_finder(char *cmd, t_variables *var_root);
+char		*path_finder(char *cmd, t_variables *var_root, t_exec *exec);
 int			arg_num_finder(t_token *tmp);
 char		**args_filler(t_token *tmp, char *path);
 int			count_heredocs(t_token *tmp);

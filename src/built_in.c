@@ -269,7 +269,7 @@ void ft_exit(t_state *state, int i)
 			if (is_numeric(tmp->next->str) == 0)
 			{
 				state->status = ft_atoi(tmp->next->str);
-				write(2, "exit\n", 5);
+				write(1, "exit\n", 5);
 			}
 			else
 			{

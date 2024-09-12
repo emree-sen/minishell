@@ -113,13 +113,8 @@ t_exec	**exec_filler(t_state *state, t_variables *var_root)
 				}
 				if (exec[j]->cmd_type != BUILTIN)
 				{
-					exec[j]->path = path_finder(tmp->str, var_root);
-					if (!exec[j]->path)
-					{
-						exec[j]->err_val = 1271;
-						exec[j]->err_str = ft_strdup("command not found");
-					}
-					else
+					path_finder(tmp->str, var_root, exec[j]);
+					if (exec[j]->path != NULL)
 						exec[j]->args = args_filler(tmp, exec[j]->path);
 				}
 			}
@@ -152,21 +147,33 @@ t_exec	**exec_create(t_state *state)
 	return (exec);
 }
 
-char	*path_finder(char *cmd, t_variables *var_root)
+void	ft_set_error(t_exec *exec, int err)
+{
+	exec->err_val = err;
+	exec->err_str = ft_strdup(strerror(err));
+}
+
+char	*path_finder(char *cmd, t_variables *var_root, t_exec *exec)
 {
 	char	*path;
 	char	*tmp;
 	char	**paths;
 	int		i;
+	struct stat	buf;
 
+	stat(cmd, &buf);
 	paths = ft_split(ft_getenv("PATH", var_root), ':');
 	if (!paths)
 		return (NULL);
 	i = -1;
 	if (is_has_slash(cmd))
 	{
-		if (!access(cmd, F_OK))
-			return (ft_free_split(paths), ft_strdup(cmd));
+		if (access(cmd, F_OK) == -1)
+			return (ft_free_split(paths), ft_set_error(exec, 1271), NULL);
+		else if (buf.st_mode & S_IFDIR)
+			return (ft_free_split(paths), ft_set_error(exec, ERR_IS_A_DIRECTORY), NULL);
+		else if (access(cmd, X_OK) == -1)
+			return (ft_free_split(paths), ft_set_error(exec, 1261), NULL);
 	}
 	else
 	{
@@ -175,11 +182,20 @@ char	*path_finder(char *cmd, t_variables *var_root)
 			tmp = ft_strjoin(paths[i], "/");
 			path = ft_strjoin(tmp, cmd);
 			if (ft_strcmp(tmp, path) != 0 && !access(path, F_OK))
-				return (ft_free_split(paths) , free(tmp), path);
+			{
+				stat(path, &buf);
+				if (buf.st_mode & S_IFDIR)
+					return (ft_free_split(paths), ft_set_error(exec, ERR_IS_A_DIRECTORY), NULL);
+				else if ((buf.st_mode & S_IFREG) == 0)
+					return (ft_free_split(paths), ft_set_error(exec, 1261), NULL);
+				exec->path = path;
+				return (ft_free_split(paths), free(tmp), path);
+			}
 			free(tmp);
 			free(path);
 		}
 	}
+	ft_set_error(exec, 1271);
 	return (ft_free_split(paths) , NULL);
 }
 
