@@ -87,40 +87,42 @@ void	init_redirection(t_token *tmp, t_exec *exec)
 		exec->in_type = REDLL;
 }
 
+void fill_exec(t_exec *exec, t_token *tmp, t_variables *var_root)
+{
+	while (tmp)
+	{
+		if (tmp->type == CMD)
+		{
+			if (is_built_in(tmp) == 1)
+			{
+				exec->cmd_type = BUILTIN;
+				exec->path = ft_strdup(tmp->str);
+				exec->args = args_filler(tmp, exec->path);
+			}
+			if (exec->cmd_type != BUILTIN)
+			{
+				path_finder(tmp->str, var_root, exec);
+				if (exec->path != NULL)
+					exec->args = args_filler(tmp, exec->path);
+			}
+		}
+		init_redirection(tmp, exec);
+		tmp = tmp->next;
+	}
+}
+
 t_exec	**exec_filler(t_state *state, t_variables *var_root)
 {
 	int		i;
 	int		j;
 	t_exec	**exec;
-	t_token	*tmp;
 
 	exec = exec_create(state);
 	i = 0;
 	j = -1;
 	while (i < state->arr_len)
 	{
-		tmp = state->token_arr[i];
-		j++;
-		while (tmp)
-		{
-			if (tmp->type == CMD)
-			{
-				if (is_built_in(tmp) == 1)
-				{
-					exec[j]->cmd_type = BUILTIN;
-					exec[j]->path = ft_strdup(tmp->str);
-					exec[j]->args = args_filler(tmp, exec[j]->path);
-				}
-				if (exec[j]->cmd_type != BUILTIN)
-				{
-					path_finder(tmp->str, var_root, exec[j]);
-					if (exec[j]->path != NULL)
-						exec[j]->args = args_filler(tmp, exec[j]->path);
-				}
-			}
-			init_redirection(tmp, exec[j]);
-			tmp = tmp->next;
-		}
+		fill_exec(exec[i], state->token_arr[i], var_root);
 		i++;
 	}
 	return (exec);

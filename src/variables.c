@@ -58,3 +58,11 @@ void	variables_del(t_variables *var)
 	free(var->key);
 	free(var);
 }
+
+void new_variable_adder(t_variables *var_root, char *key, char *value)
+{
+	t_variables	*new;
+
+	new = variables_new(key, value);
+	variables_add_last(&var_root, new);
+}

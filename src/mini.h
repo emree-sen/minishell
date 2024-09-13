@@ -238,6 +238,9 @@ void 		ft_pwd();
 void		ft_echo(char **args);
 void		ft_cd(char **args, t_state *state, t_variables *var_root);
 void		ft_exit(t_state *state, int i);
-void	printf_spesific_error(int err_type, char *str);
+void		printf_spesific_error(int err_type, char *str);
+void		new_variable_adder(t_variables *var_root, char *key, char *value);
+void		dup_exec_in_out(t_exec **exec, int i);
+void		check_first_command(t_exec **exec, int **fds, int i);
 
 #endif
