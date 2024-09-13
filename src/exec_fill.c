@@ -2,21 +2,20 @@
 
 int	is_built_in(t_token *tmp)
 {
-
-	if (ft_strcmp(tmp->str , "echo") == 0)
-	 	return (1);
-	if (ft_strcmp(tmp->str , "cd") == 0)
+	if (ft_strcmp(tmp->str, "echo") == 0)
 		return (1);
-	else if (ft_strcmp(tmp->str , "pwd") == 0)
-	 	return (1);
-	else if (ft_strcmp(tmp->str , "export") == 0)
+	if (ft_strcmp(tmp->str, "cd") == 0)
 		return (1);
-	else if (ft_strcmp(tmp->str , "unset") == 0)
-	 	return (1);
-	else if (ft_strcmp(tmp->str , "env") == 0)
-	 	return (1);
-	else if (ft_strcmp(tmp->str , "exit") == 0)
-	  	return (1);
+	else if (ft_strcmp(tmp->str, "pwd") == 0)
+		return (1);
+	else if (ft_strcmp(tmp->str, "export") == 0)
+		return (1);
+	else if (ft_strcmp(tmp->str, "unset") == 0)
+		return (1);
+	else if (ft_strcmp(tmp->str, "env") == 0)
+		return (1);
+	else if (ft_strcmp(tmp->str, "exit") == 0)
+		return (1);
 	return (0);
 }
 
@@ -25,14 +24,13 @@ void	init_heredoc(t_token *tmp, t_exec *exec)
 	int	heredoc_num;
 
 	if (exec->heredocs == NULL)
-		{
-			heredoc_num = count_heredocs(tmp);
-			exec->heredocs = malloc(sizeof(char *) * (heredoc_num
-						+ 1));
-			exec->heredocs[heredoc_num] = NULL;
-		}
-		exec->heredocs[exec->heredoc_idx] = ft_strdup(tmp->str);
-		exec->heredoc_idx++;
+	{
+		heredoc_num = count_heredocs(tmp);
+		exec->heredocs = malloc(sizeof(char *) * (heredoc_num + 1));
+		exec->heredocs[heredoc_num] = NULL;
+	}
+	exec->heredocs[exec->heredoc_idx] = ft_strdup(tmp->str);
+	exec->heredoc_idx++;
 }
 
 void	init_redr(t_token *tmp, t_exec *exec)
@@ -87,7 +85,7 @@ void	init_redirection(t_token *tmp, t_exec *exec)
 		exec->in_type = REDLL;
 }
 
-void fill_exec(t_exec *exec, t_token *tmp, t_variables *var_root)
+void	fill_exec(t_exec *exec, t_token *tmp, t_variables *var_root)
 {
 	while (tmp)
 	{
@@ -155,50 +153,62 @@ void	ft_set_error(t_exec *exec, int err)
 	exec->err_str = ft_strdup(strerror(err));
 }
 
-char	*path_finder(char *cmd, t_variables *var_root, t_exec *exec)
+void	ft_absoulte_path(char *cmd, t_exec *exec)
 {
-	char	*path;
-	char	*tmp;
-	char	**paths;
-	int		i;
 	struct stat	buf;
 
 	stat(cmd, &buf);
-	paths = ft_split(ft_getenv("PATH", var_root), ':');
-	if (!paths)
-		return (NULL);
+	if (access(cmd, F_OK) == -1)
+		return (ft_set_error(exec, 1271));
+	else if (buf.st_mode & S_IFDIR)
+		return (ft_set_error(exec, ERR_IS_A_DIRECTORY));
+	else if ((buf.st_mode & S_IFREG) == 0)
+		return (ft_set_error(exec, 1261));
+	else if (access(cmd, X_OK) == -1)
+		return (ft_set_error(exec, 1261));
+	exec->path = ft_strdup(cmd);
+}
+
+void	ft_relavite_path(char *cmd, char **paths, t_exec *exec)
+{
+	char		*path;
+	char		*tmp;
+	int			i;
+	struct stat	buf;
+
 	i = -1;
-	if (is_has_slash(cmd))
+	while (paths[++i])
 	{
-		if (access(cmd, F_OK) == -1)
-			return (ft_free_split(paths), ft_set_error(exec, 1271), NULL);
-		else if (buf.st_mode & S_IFDIR)
-			return (ft_free_split(paths), ft_set_error(exec, ERR_IS_A_DIRECTORY), NULL);
-		else if (access(cmd, X_OK) == -1)
-			return (ft_free_split(paths), ft_set_error(exec, 1261), NULL);
-	}
-	else
-	{
-		while (paths[++i])
+		tmp = ft_strjoin(paths[i], "/");
+		path = ft_strjoin(tmp, cmd);
+		if (ft_strcmp(tmp, path) != 0 && !access(path, F_OK))
 		{
-			tmp = ft_strjoin(paths[i], "/");
-			path = ft_strjoin(tmp, cmd);
-			if (ft_strcmp(tmp, path) != 0 && !access(path, F_OK))
-			{
-				stat(path, &buf);
-				if (buf.st_mode & S_IFDIR)
-					return (ft_free_split(paths), ft_set_error(exec, ERR_IS_A_DIRECTORY), NULL);
-				else if ((buf.st_mode & S_IFREG) == 0)
-					return (ft_free_split(paths), ft_set_error(exec, 1261), NULL);
-				exec->path = path;
-				return (ft_free_split(paths), free(tmp), path);
-			}
-			free(tmp);
-			free(path);
+			stat(path, &buf);
+			if (buf.st_mode & S_IFDIR)
+				return (ft_free_split(paths), \
+							ft_set_error(exec, ERR_IS_A_DIRECTORY));
+			else if ((buf.st_mode & S_IFREG) == 0)
+				return (ft_free_split(paths), ft_set_error(exec, 1261));
+			exec->path = path;
+			return (ft_free_split(paths), free(tmp));
 		}
+		free(tmp);
+		free(path);
 	}
 	ft_set_error(exec, 1271);
-	return (ft_free_split(paths) , NULL);
+}
+
+void	path_finder(char *cmd, t_variables *var_root, t_exec *exec)
+{
+	char	**paths;
+
+	paths = ft_split(ft_getenv("PATH", var_root), ':');
+	if (!paths)
+		return ;
+	if (is_has_slash(cmd))
+		ft_absoulte_path(cmd, exec);
+	else
+		ft_relavite_path(cmd, paths, exec);
 }
 
 char	**args_filler(t_token *tmp, char *path)

@@ -26,8 +26,19 @@ t_variables	*dup_veriables(char **environ)
 		variables = variables_new(key, value);
 		variables->line = ft_strdup(environ[i]);
 		variables_add_last(&root, variables);
+		free(key);
+		free(value);
 	}
 	return (root);
+}
+
+void all_token_value_checker(t_variables *var_tmp, t_dollar *dollar, char **value)
+{
+	while (var_tmp)
+	{
+		token_value_checker(var_tmp, dollar->key, value);
+		var_tmp = var_tmp->next;
+	}
 }
 
 char	*token_value_finder(t_token *tmp, t_dollar *dollar,
@@ -55,11 +66,7 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 	else
 		dollar->key = ft_strdup("?");
 	var_tmp = var_root;
-	while (var_tmp)
-	{
-		token_value_checker(var_tmp, dollar->key, &value);
-		var_tmp = var_tmp->next;
-	}
+	all_token_value_checker(var_tmp, dollar, &value);
 	return (value);
 }
 

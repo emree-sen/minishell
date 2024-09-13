@@ -32,13 +32,26 @@ void	is_null(char *str)
 	}
 }
 
+void pass_quote_or_any(char *str, int *i)
+{
+	while (str[*i])
+	{
+		if (str[*i] == '\'' || str[*i] == '\"')
+			*i = pass_quote(str, *i);
+		if (str[*i] && str[*i] != ' ')
+			(*i)++;
+		else
+			break ;
+	}
+}
+
 t_token	*str_to_token(char *str)
 {
 	t_token	*root;
 	t_token	*token;
 	int		i;
 	int		start;
-
+	
 	i = 0;
 	root = NULL;
 	is_null(str);
@@ -46,19 +59,11 @@ t_token	*str_to_token(char *str)
 	while (str[i])
 	{
 		start = pass_any(str, &i, ' ');
-		while (str[i])
-		{
-			if (str[i] == '\'' || str[i] == '\"')
-				i = pass_quote(str, i);
-			if (str[i] && str[i] != ' ')
-				i++;
-			else
-				break ;
-		}
+		pass_quote_or_any(str, &i);
 		token = token_new(ft_substr(str, start, i - start), NONE);
 		token_add_last(&root, token);
 	}
-	return (root);
+	return (free(str), root);
 }
 
 int	pass_str_pls(char *str, int i)

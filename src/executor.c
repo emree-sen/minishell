@@ -10,7 +10,7 @@ void	state_arr_len_set(t_state *state)
 	state->arr_len = i;
 }
 
-void	exec_print(t_exec **exec)
+void	exec_print(t_exec **exec) // bunu düzeltmeye gerek yok
 {
 	int	i;
 	int	j;
@@ -151,6 +151,39 @@ void exit_num(int ex_num)
 		exit(1);
 }
 
+void	ft_free_exec(t_exec **exec)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	while (exec[i])
+	{
+		j = 0;
+		while (exec[i]->args && exec[i]->args[j])
+		{
+			free(exec[i]->args[j]);
+			j++;
+		}
+		if (exec[i]->args)
+			free(exec[i]->args);
+		j = 0;
+		while (exec[i]->heredocs && exec[i]->heredocs[j])
+		{
+			free(exec[i]->heredocs[j]);
+			j++;
+		}
+		if (exec[i]->err_str)
+			free(exec[i]->err_str);
+		if (exec[i]->path)
+			free(exec[i]->path);
+		if (exec[i]->heredocs)
+			free(exec[i]->heredocs);
+		free(exec[i]);
+		i++;
+	}
+	free(exec);
+}
 
 void	executor(t_state *state, t_variables *var_root)
 {
@@ -259,5 +292,7 @@ void	executor(t_state *state, t_variables *var_root)
 		waitpid(pid[i], NULL, 0);
 		i++;
 	}
+	ft_free_exec(exec);
+	free(pid);
 	// parent
 }
