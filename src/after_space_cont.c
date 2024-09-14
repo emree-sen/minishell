@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   after_space_cont.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:08:57 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:08:58 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 int	is_has_space(char *str)
@@ -32,9 +44,7 @@ void	token_extract_spaces(t_token **token_root)
 {
 	t_token	*tmp;
 	t_token	*new;
-	int		i;
 
-	i = 0;
 	tmp = *token_root;
 	new = NULL;
 	while (tmp)

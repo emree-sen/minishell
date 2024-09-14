@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   fds.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:44 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:45 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 int	**fds_filler(int **fds, t_state *state)
@@ -39,7 +51,6 @@ void	fd_closer(int **fds, int i, t_state *state)
 		j++;
 	}
 }
-
 
 void	close_all_fd(int **fds, t_state *state)
 {

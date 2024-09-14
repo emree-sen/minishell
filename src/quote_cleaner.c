@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   quote_cleaner.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:11 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:10:12 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 char	*token_dup_quote(t_token *tmp, int *flag, int i, int j)
@@ -39,9 +51,7 @@ void	token_quote_detective(t_token *tmp)
 void	token_del_quote(t_token *token_root)
 {
 	t_token	*tmp;
-	int		i;
 
-	i = 0;
 	tmp = token_root;
 	while (tmp)
 	{

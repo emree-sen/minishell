@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   token_sep_by_pipe2.c                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:34 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 16:31:44 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 t_token	**finalize_token_array(t_token **list_array, int size)
@@ -26,7 +38,10 @@ void	process_tokens(t_token *start, t_token *current,
 
 	new_list = copy_token_list(start, current);
 	if (new_list)
+	{
 		*sep_list = add_to_token_list_array(*sep_list, new_list, size);
+		
+	}
 }
 
 t_token	**token_separate_by_pipe(t_token *token_root)
@@ -35,7 +50,8 @@ t_token	**token_separate_by_pipe(t_token *token_root)
 	t_token	*current;
 	t_token	*start;
 	int		size;
-
+	t_token	*tmp;
+	
 	separated_lists = NULL;
 	current = token_root;
 	start = token_root;
@@ -44,8 +60,12 @@ t_token	**token_separate_by_pipe(t_token *token_root)
 	{
 		if (current->type == PIPE)
 		{
+			tmp = current;
 			process_tokens(start, current, &separated_lists, &size);
 			start = current->next;
+			current = current->next;
+			token_del(tmp);
+			continue ;
 		}
 		current = current->next;
 	}

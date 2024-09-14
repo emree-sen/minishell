@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heredoc.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:52 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:22:51 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 int	*heredoc_create(t_state *state)
@@ -17,6 +29,27 @@ int	*heredoc_create(t_state *state)
 	return (heredoc_fds);
 }
 
+void	heredoc_writer(t_exec *exec, int *pipe_fd, char *input)
+{
+	if (!ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
+	{
+		if (exec->heredocs[exec->heredoc_idx + 1])
+			exec->heredoc_idx++;
+		else
+			return ;
+	}
+	else
+	{
+		if (exec->heredocs[exec->heredoc_idx + 1])
+			return ;
+		else
+		{
+			write(pipe_fd[1], input, ft_strlen(input));
+			write(pipe_fd[1], "\n", 1);
+		}
+	}
+}
+
 void	heredoc_setter(t_exec *exec)
 {
 	int		pipe_fd[2];
@@ -33,23 +66,7 @@ void	heredoc_setter(t_exec *exec)
 		input = readline("> ");
 		if (!input)
 			break ;
-		if (!ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
-		{
-			if (exec->heredocs[exec->heredoc_idx + 1])
-				exec->heredoc_idx++;
-			else
-				break ;
-		}
-		else
-		{
-			if (exec->heredocs[exec->heredoc_idx + 1])
-				continue ;
-			else
-			{
-				write(pipe_fd[1], input, ft_strlen(input));
-				write(pipe_fd[1], "\n", 1);
-			}
-		}
+		heredoc_writer(exec, pipe_fd, input);
 	}
 	if (exec->heredocs != NULL && exec->in_type == REDLL)
 		exec->in_fd = pipe_fd[0];

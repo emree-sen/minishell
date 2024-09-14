@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   built_in3.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:10 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:11 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
-int is_just_n(char *str)
+int	is_just_n(char *str)
 {
 	int	i;
 
@@ -19,7 +31,7 @@ int is_just_n(char *str)
 	return (1);
 }
 
-void ft_echo(char **args)
+void	ft_echo(char **args)
 {
 	int	i;
 	int	flag;
@@ -40,10 +52,9 @@ void ft_echo(char **args)
 	}
 	if (flag == 0)
 		write(1, "\n", 1);
-
 }
 
-void env_node_updater(t_variables *var_root, char *key, char *value)
+void	env_node_updater(t_variables *var_root, char *key, char *value)
 {
 	t_variables	*tmp;
 	char		*tmp_line;
@@ -71,7 +82,8 @@ void env_node_updater(t_variables *var_root, char *key, char *value)
 	}
 }
 
-void chdir_check(char **args, t_state *state, t_variables *var_root, char *oldpwd)
+void	chdir_check(char **args, t_state *state,
+			t_variables *var_root, char *oldpwd)
 {
 	struct stat	buf;
 
@@ -90,10 +102,10 @@ void chdir_check(char **args, t_state *state, t_variables *var_root, char *oldpw
 		env_node_updater(var_root, "OLDPWD", oldpwd);
 }
 
-void ft_cd(char **args, t_state *state, t_variables *var_root)
+void	ft_cd(char **args, t_state *state, t_variables *var_root)
 {
-	char	*home;
-	char	*oldpwd;
+	char		*home;
+	char		*oldpwd;
 	struct stat	buf;
 
 	stat(args[1], &buf);

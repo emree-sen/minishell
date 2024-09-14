@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   str_to_token.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:23 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 14:38:59 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 int	pass_quote(char *str, int qi)
@@ -18,21 +30,7 @@ int	pass_str(char *str, int si)
 	return (si);
 }
 
-int	pass_any(char *str, int *ai, char any)
-{
-	while (str[*ai] && str[*ai] == any)
-		(*ai)++;
-	return (*ai);
-}
-void	is_null(char *str)
-{
-	if (!str)
-	{
-		str = ft_strdup("");
-	}
-}
-
-void pass_quote_or_any(char *str, int *i)
+void	pass_quote_or_any(char *str, int *i)
 {
 	while (str[*i])
 	{
@@ -51,7 +49,7 @@ t_token	*str_to_token(char *str)
 	t_token	*token;
 	int		i;
 	int		start;
-	
+
 	i = 0;
 	root = NULL;
 	is_null(str);
