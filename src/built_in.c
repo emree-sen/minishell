@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   built_in.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:01 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:02 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
-void ft_pwd()
+void	ft_pwd(void)
 {
 	char	*pwd;
 
@@ -9,7 +21,7 @@ void ft_pwd()
 	free(pwd);
 }
 
-int ft_arr_len(t_token *tmp)
+int	ft_arr_len(t_token *tmp)
 {
 	int	len;
 
@@ -40,7 +52,7 @@ int	is_numeric(char *str)
 	return (0);
 }
 
-void arg_check(t_token *tmp, t_state *state)
+void	arg_check(t_token *tmp, t_state *state)
 {
 	if (tmp->type == ARG)
 	{
@@ -58,7 +70,7 @@ void arg_check(t_token *tmp, t_state *state)
 	}
 }
 
-void ft_exit(t_state *state, int i)
+void	ft_exit(t_state *state, int i)
 {
 	t_token	*tmp;
 	int		len;

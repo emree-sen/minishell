@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   commands2.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:16 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:17 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
-void single_command(t_exec **exec, int i)
+void	single_command(t_exec **exec, int i)
 {
 	if (exec[i]->in_fd != -1)
 		dup2(exec[i]->in_fd, 0);
@@ -8,12 +20,12 @@ void single_command(t_exec **exec, int i)
 		dup2(exec[i]->out_fd, 1);
 }
 
-void multi_command_without_redr(int **fds, int i, t_state *state)
+void	multi_command_without_redr(int **fds, int i, t_state *state)
 {
 	fd_setter_without_redr(fds, i, state);
 }
 
-void multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state)
+void	multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state)
 {
 	if (exec[i]->in_fd != -1)
 	{
@@ -50,7 +62,7 @@ void	fd_setter_without_redr(int **fds, int i, t_state *state)
 	fd_closer(fds, i, state);
 }
 
-void dup_exec_in_out(t_exec **exec, int i)
+void	dup_exec_in_out(t_exec **exec, int i)
 {
 	dup2(exec[i]->in_fd, 0);
 	close(exec[i]->in_fd);

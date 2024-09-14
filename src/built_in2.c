@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   built_in2.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:06 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:07 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 int	is_alporund(char *str)
@@ -48,7 +60,7 @@ void	ft_export(t_state *state, t_variables *var_root, int i)
 	}
 }
 
-void variable_deler(t_variables **var_root, char *key)
+void	variable_deler(t_variables **var_root, char *key)
 {
 	t_variables	*tmp;
 
@@ -64,7 +76,7 @@ void variable_deler(t_variables **var_root, char *key)
 	}
 }
 
-void ft_unset(t_variables *var_root, t_state *state, int i)
+void	ft_unset(t_variables *var_root, t_state *state, int i)
 {
 	t_token		*token;
 
@@ -73,12 +85,13 @@ void ft_unset(t_variables *var_root, t_state *state, int i)
 	{
 		if (token->type == ARG)
 		{
-			if (ft_isalpha(token->str[0]) || token->str[0] == '_' ||
-					ft_strchr(token->str, '=') == NULL)
+			if (ft_isalpha(token->str[0]) || token->str[0] == '_'
+				|| ft_strchr(token->str, '=') == NULL)
 				variable_deler(&var_root, token->str);
 			else
 			{
-				printf("minishell: unset: `%s': not a valid identifier\n", token->str);
+				printf("minishell: unset: `%s': not a valid identifier\n",
+					token->str);
 				state->status = ERR_NOT_VALID_IDFR;
 			}
 		}
@@ -86,7 +99,7 @@ void ft_unset(t_variables *var_root, t_state *state, int i)
 	}
 }
 
-void ft_env(t_variables *var_root)
+void	ft_env(t_variables *var_root)
 {
 	t_variables	*tmp;
 

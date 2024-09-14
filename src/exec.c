@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:30 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:31 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
-void exec_init(t_exec *exec)
+void	exec_init(t_exec *exec)
 {
 	exec->path = NULL;
 	exec->args = NULL;
@@ -44,7 +56,7 @@ int	arg_num_finder(t_token *tmp)
 	return (i);
 }
 
-int is_has_slash(char *str)
+int	is_has_slash(char *str)
 {
 	int	i;
 
@@ -71,4 +83,3 @@ char	*ft_getenv(char *key, t_variables *var_root)
 	}
 	return (NULL);
 }
-

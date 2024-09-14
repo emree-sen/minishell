@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   commands3.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:22 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:09:23 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
-void check_first_command(t_exec **exec, int **fds, int i)
+void	check_first_command(t_exec **exec, int **fds, int i)
 {
 	if (exec[i]->in_fd != -1 && exec[i]->out_fd != -1)
 	{

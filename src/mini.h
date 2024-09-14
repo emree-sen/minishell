@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   mini.h                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:03 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 13:05:53 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef MINI_H
 # define MINI_H
 
@@ -12,6 +24,7 @@
 # include <termios.h>
 # include "sys/stat.h"
 # include "errno.h"
+# include "sys/wait.h"
 
 # define ERR_CMD_NOT_FOUND 127
 # define ERR_IS_A_DIRECTORY 126
@@ -81,11 +94,6 @@ typedef struct s_state
 	int			arr_len;
 }	t_state;
 
-typedef struct s_heredocs
-{
-	int			*heredoc_fds;
-}	t_heredocs;
-
 typedef struct s_exec
 {
 	char	*path; // -> /bin/ls
@@ -98,12 +106,19 @@ typedef struct s_exec
 	char	**heredocs; // -> {"a", "b", NULL}
 	int		heredoc_idx;
 	int		in_type;
-	int 	cmd_type;
-
+	int		cmd_type;
 	int		err_val;
 	char	*err_str;
 }	t_exec;
 // execve("/bin/ls", ["/bin/ls", "-l", "-a", NULL], envp);
+
+typedef struct s_exec_params
+{
+	t_exec			**exec;
+	t_state			*state;
+	t_variables		*var_root;
+	int				**fds;
+}	t_exec_params;
 
 //hazırlık
 t_token		*token_new(char *str, t_token_type type);
@@ -181,6 +196,7 @@ t_token		**token_separate_by_pipe(t_token *token_root);
 void		set_token_type(t_token *token, int *flag);
 void		handle_redirection(t_token **token);
 void		token_arr_set_type(t_token **token_arr);
+void		is_null(char *str);
 
 //syntax kontrol
 int			check_the_syntax(char *input);
@@ -219,22 +235,25 @@ void		exec_print(t_exec **exec);
 int			**fds_filler(int **fds, t_state *state);
 void		fd_closer(int **fds, int i, t_state *state);
 void		close_all_fd(int **fds, t_state *state);
-void		wait_all_children(int arr_len);
 void		ft_print_exec_errors(t_exec **exec, t_state *state);
+void		ft_print_exec_errors2(t_exec **exec, t_state *state, int i);
 char		**env_list_creator(t_variables *var_root);
 void		single_command(t_exec **exec, int i);
 void		fd_setter_without_redr(int **fds, int i, t_state *state);
-void		fd_setter_with_redr(t_exec **exec, int **fds, int i, t_state *state);
+void		fd_setter_with_redr(t_exec **exec,
+				int **fds, int i, t_state *state);
 void		multi_command_without_redr(int **fds, int i, t_state *state);
-void		multi_command_with_redr(t_exec **exec, int i, int **fds, t_state *state);
+void		multi_command_with_redr(t_exec **exec, int i,
+				int **fds, t_state *state);
 void		executor(t_state *state, t_variables *var_root);
 void		exec_init(t_exec *exec);
-int 		is_built_in(t_token *tmp);
+int			is_built_in(t_token *tmp);
 void		ft_export(t_state *state, t_variables *var_root, int i);
-void		single_command_built_in(t_exec **exec, t_state *state, t_variables *var_root, int i);
+void		single_command_built_in(t_exec **exec, t_state *state,
+				t_variables *var_root, int i);
 void		ft_env(t_variables *var_root);
 void		ft_unset(t_variables *var_root, t_state *state, int i);
-void 		ft_pwd();
+void		ft_pwd(void);
 void		ft_echo(char **args);
 void		ft_cd(char **args, t_state *state, t_variables *var_root);
 void		ft_exit(t_state *state, int i);
@@ -242,5 +261,22 @@ void		printf_spesific_error(int err_type, char *str);
 void		new_variable_adder(t_variables *var_root, char *key, char *value);
 void		dup_exec_in_out(t_exec **exec, int i);
 void		check_first_command(t_exec **exec, int **fds, int i);
+void		init_redirection(t_token *tmp, t_exec *exec);
+void		ft_free_exec(t_exec **exec);
+void		exit_num(int ex_num);
+void		ft_set_error(t_exec *exec, int err);
+void		ft_free_var_root(t_variables *var_root);
+void		ft_free_token_arr(t_token **token_arr);
+void		ft_free_root(t_token *root);
 
+void		execute_commands(t_exec_params *params, pid_t *pid);
+pid_t		fork_process(t_exec_params *params, int i);
+void		handle_child_process(t_exec_params *params, int i);
+void		execute_multi_command(t_exec_params *params, int i);
+void		execute_heredocs(t_exec **exec);
+int			**prepare_fds(t_state *state);
+void		wait_for_children(pid_t *pid, t_state *state);
+void		free_resources(t_exec **exec, pid_t *pid);
+void		execute_single_builtin(t_exec **exec, t_state *state,
+				t_variables *var_root, int i);
 #endif

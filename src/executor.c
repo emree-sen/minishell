@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   executor.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:09:36 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 13:08:36 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 void	state_arr_len_set(t_state *state)
@@ -10,7 +22,15 @@ void	state_arr_len_set(t_state *state)
 	state->arr_len = i;
 }
 
-void	exec_print(t_exec **exec) // bunu düzeltmeye gerek yok
+void	printer(t_exec *exec)
+{
+	printf("input_file: %s\n", exec->input_file);
+	printf("in_fd: %d\n", exec->in_fd);
+	printf("output_file: %s\n", exec->output_file);
+	printf("out_fd: %d\n", exec->out_fd);
+}
+
+void	exec_print(t_exec **exec)
 {
 	int	i;
 	int	j;
@@ -34,257 +54,150 @@ void	exec_print(t_exec **exec) // bunu düzeltmeye gerek yok
 				printf("heredocs: %s\n", exec[i]->heredocs[j]);
 			j++;
 		}
-		printf("input_file: %s\n", exec[i]->input_file);
-		printf("in_fd: %d\n", exec[i]->in_fd);
-		printf("output_file: %s\n", exec[i]->output_file);
-		printf("out_fd: %d\n", exec[i]->out_fd);
+		printer(exec[i]);
 		i++;
 	}
-}
-
-void	wait_all_children(int arr_len)
-{
-	int	i;
-	int	status;
-
-	i = 0;
-	while (i < arr_len)
-	{
-		waitpid(-1, &status, 0);
-		i++;
-	}
-}
-
-void	ft_print_exec_errors(t_exec **exec, t_state *state)
-{
-	int	i;
-
-	i = 0;
-	while (exec[i])
-	{
-		if (exec[i]->err_val != 0)
-		{
-			write(2, "minishell: ", 11);
-			if (exec[i]->err_val == 1)
-			{
-				write(2, exec[i]->err_str, ft_strlen(exec[i]->err_str));
-				write(2, "\n", 1);			
-			}
-			else if (exec[i]->err_val == 1261)
-			{
-				write(2, "Permission denied\n", 19);
-			}
-			else if (exec[i]->err_val == 1271)
-			{
-				write(2, state->token_arr[i]->str, ft_strlen(state->token_arr[i]->str));
-				write(2, ": command not found\n", 20);
-			}
-			else if (exec[i]->err_val == ERR_IS_A_DIRECTORY)
-			{
-				write(2, state->token_arr[i]->str, ft_strlen(state->token_arr[i]->str));
-				write(2, ": Is a directory\n", 18);
-			}
-		}
-		i++;
-	}
-}
-
-char	**env_list_creator(t_variables *var_root)
-{
-	t_variables	*tmp;
-	char		**env;
-	int			i;
-
-	tmp = var_root;
-	i = 0;
-	while (tmp)
-	{
-		i++;
-		tmp = tmp->next;
-	}
-	env = malloc(sizeof(char *) * (i + 1));
-	if (!env)
-		exit(1);
-	i = 0;
-	tmp = var_root;
-	while (tmp)
-	{
-		env[i] = ft_strdup(tmp->line);
-		i++;
-		tmp = tmp->next;
-	}
-	env[i] = NULL;
-	return (env);
-}
-
-void single_command_built_in(t_exec **exec, t_state *state, t_variables *var_root, int i)
-{
-	if (exec[i]->cmd_type == BUILTIN)
-	{
-		if (ft_strcmp(exec[i]->args[0], "echo") == 0)
-		 	ft_echo(exec[i]->args);
-		else if (ft_strcmp(exec[i]->args[0], "cd") == 0)
-		 	ft_cd(exec[i]->args, state , var_root);
-		else if (ft_strcmp(exec[i]->args[0], "pwd") == 0)
-		 	ft_pwd();
-		else if (ft_strcmp(exec[i]->args[0], "export") == 0)
-			ft_export(state, var_root, i);
-		else if (ft_strcmp(exec[i]->args[0], "unset") == 0)
-		 	ft_unset(var_root, state, i);
-		else if (ft_strcmp(exec[i]->args[0], "env") == 0)
-			ft_env(var_root);
-		else if (ft_strcmp(exec[i]->args[0], "exit") == 0)
-		  	ft_exit(state, i);
-	}
-}
-
-void exit_num(int ex_num)
-{
-	// printf("ex_num: %d\n", ex_num);
-	if (ex_num == 127)
-		exit(127);
-	else if (ex_num == 126 || ex_num == 1261)
-		exit(126);
-	else if (ex_num == 1271)
-		exit(127);
-	else
-		exit(1);
-}
-
-void	ft_free_exec(t_exec **exec)
-{
-	int	i;
-	int	j;
-
-	i = 0;
-	while (exec[i])
-	{
-		j = 0;
-		while (exec[i]->args && exec[i]->args[j])
-		{
-			free(exec[i]->args[j]);
-			j++;
-		}
-		if (exec[i]->args)
-			free(exec[i]->args);
-		j = 0;
-		while (exec[i]->heredocs && exec[i]->heredocs[j])
-		{
-			free(exec[i]->heredocs[j]);
-			j++;
-		}
-		if (exec[i]->err_str)
-			free(exec[i]->err_str);
-		if (exec[i]->path)
-			free(exec[i]->path);
-		if (exec[i]->heredocs)
-			free(exec[i]->heredocs);
-		free(exec[i]);
-		i++;
-	}
-	free(exec);
 }
 
 void	executor(t_state *state, t_variables *var_root)
 {
-	t_exec	**exec;
-	int		**fds;
-	char	**env;
-	pid_t	*pid;
-	int		i;
-	int		tmp_fd;
+	t_exec			**exec;
+	int				**fds;
+	pid_t			*pid;
+	t_exec_params	params;
 
-	i = 0;
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
-	//exec_print(exec);
-	
+	ft_print_exec_errors(exec, state);
+	execute_heredocs(exec);
+	fds = prepare_fds(state);
+	pid = malloc(sizeof(pid_t) * state->arr_len);
+	params.exec = exec;
+	params.state = state;
+	params.var_root = var_root;
+	params.fds = fds;
+	execute_commands(&params, pid);
+	close_all_fd(fds, state);
+	wait_for_children(pid, state);
+	free_resources(exec, pid);
+}
+
+void	execute_heredocs(t_exec **exec)
+{
+	int	i;
+
+	i = 0;
 	while (exec[i])
 	{
 		heredoc_setter(exec[i]);
 		i++;
 	}
-	ft_print_exec_errors(exec, state);
-	fds = NULL;
+}
+
+int	**prepare_fds(t_state *state)
+{
 	if (state->arr_len > 1)
-		fds = fds_filler(fds, state);
-	pid = malloc(sizeof(pid_t) * state->arr_len);
-	i = 0;
-	while (i < state->arr_len)
+		return (fds_filler(NULL, state));
+	return (NULL);
+}
+
+void	execute_single_builtin(t_exec **exec, t_state *state,
+		t_variables *var_root, int i)
+{
+	int	tmp_fd;
+
+	if (exec[i]->err_val != 0)
 	{
-		if (state->arr_len == 1 && exec[i]->cmd_type == BUILTIN)
+		state->status = 1;
+		return ;
+	}
+	tmp_fd = dup(1);
+	if (exec[i]->out_fd != -1)
+		dup2(exec[i]->out_fd, 1);
+	single_command_built_in(exec, state, var_root, i);
+	if (exec[i]->out_fd != -1)
+		dup2(tmp_fd, 1);
+}
+
+void	execute_commands(t_exec_params *params, pid_t *pid)
+{
+	int	i;
+
+	i = 0;
+	while (i < params->state->arr_len)
+	{
+		if (params->state->arr_len == 1 && params->exec[i]->cmd_type == BUILTIN)
 		{
-			if (exec[i]->err_val != 0)
-			{
-				state->status = 1;
-				break;
-			}
-			tmp_fd = dup(1);
-			if (exec[i]->out_fd != -1)
-				dup2(exec[i]->out_fd, 1);
-			single_command_built_in(exec, state, var_root, i);
-			if (exec[i]->out_fd != -1)
-				dup2(tmp_fd, 1);
+			execute_single_builtin(params->exec, params->state,
+				params->var_root, i);
 			break ;
 		}
-		pid[i] = fork();
-		if (pid[i] < 0)
-			exit(1); // hata kodu
-		else if (pid[i] == 0)
-		{
-			if (state->arr_len == 1)
-			{
-				if (exec[i]->err_val != 0)
-				{
-					close_all_fd(fds, state);
-					exit_num(exec[i]->err_val);
-				}
-				single_command(exec, i);
-			}
-			else if (state->arr_len > 1)
-			{
-				if (exec[i]->err_val != 0)
-				{
-					// printf("err_val: %d\n", exec[i]->err_val);
-					close_all_fd(fds, state);
-					exit_num(exec[i]->err_val);
-				}
-				if (exec[i]->in_fd != -1 || exec[i]->out_fd != -1)
-				{
-					multi_command_with_redr(exec, i, fds, state);
-					if (exec[i]->cmd_type == BUILTIN)
-					{
-						single_command_built_in(exec, state, var_root, i);
-						i++;
-						exit(0);
-					}
-				}
-				else
-				{
-					multi_command_without_redr(fds, i, state);
-					if (exec[i]->cmd_type == BUILTIN)
-					{
-						single_command_built_in(exec, state, var_root, i);
-						i++;
-						exit(0);
-					}
-				}
-			}
-			if (exec[i]->path == NULL)
-				exit(127);
-			env = env_list_creator(var_root);
-			execve(exec[i]->path, exec[i]->args, env);
-			exit(127);
-		}
+		pid[i] = fork_process(params, i);
 		i++;
 	}
+}
+
+pid_t	fork_process(t_exec_params *params, int i)
+{
+	pid_t	pid;
+
+	pid = fork();
+	if (pid < 0)
+		exit(1);
+	else if (pid == 0)
+	{
+		handle_child_process(params, i);
+	}
+	return (pid);
+}
+
+void	handle_child_process(t_exec_params *params, int i)
+{
+	char	**env;
+
+	if (params->exec[i]->err_val != 0)
+	{
+		close_all_fd(params->fds, params->state);
+		exit_num(params->exec[i]->err_val);
+	}
+	if (params->state->arr_len == 1)
+		single_command(params->exec, i);
+	else
+		execute_multi_command(params, i);
+	if (params->exec[i]->path == NULL)
+		exit(127);
+	env = env_list_creator(params->var_root);
+	execve(params->exec[i]->path, params->exec[i]->args, env);
+	exit(127);
+}
+
+void	execute_multi_command(t_exec_params *params, int i)
+{
+	if (params->exec[i]->in_fd != -1 || params->exec[i]->out_fd != -1)
+	{
+		multi_command_with_redr(params->exec, i, params->fds, params->state);
+	}
+	else
+	{
+		multi_command_without_redr(params->fds, i, params->state);
+	}
+	if (params->exec[i]->cmd_type == BUILTIN)
+	{
+		single_command_built_in(params->exec, params->state, params->var_root,
+			i);
+		exit(0);
+	}
+}
+
+void	wait_for_children(pid_t *pid, t_state *state)
+{
+	int	i;
+
 	i = 0;
-	close_all_fd(fds, state);
 	while (i < state->arr_len)
 	{
 		if (i == state->arr_len - 1)
 		{
-			// printf("pid: %d\n", pid[i]);
 			waitpid(pid[i], &state->status, 0);
 			if (WIFEXITED(state->status))
 				state->status = WEXITSTATUS(state->status);
@@ -292,7 +205,10 @@ void	executor(t_state *state, t_variables *var_root)
 		waitpid(pid[i], NULL, 0);
 		i++;
 	}
+}
+
+void	free_resources(t_exec **exec, pid_t *pid)
+{
 	ft_free_exec(exec);
 	free(pid);
-	// parent
 }

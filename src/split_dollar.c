@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   split_dollar.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:20 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:10:21 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 void	token_value_checker(t_variables *var_tmp, char *key, char **value)
@@ -32,7 +44,8 @@ t_variables	*dup_veriables(char **environ)
 	return (root);
 }
 
-void all_token_value_checker(t_variables *var_tmp, t_dollar *dollar, char **value)
+void	all_token_value_checker(t_variables *var_tmp,
+			t_dollar *dollar, char **value)
 {
 	while (var_tmp)
 	{
@@ -98,32 +111,4 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 		tmp = tmp->next;
 	}
 	token_extract_spaces(token_root);
-}
-
-void	token_replace_value(t_token **str, t_dollar *dollar, int *i,
-		t_state *state)
-{
-	int		end;
-	char	*left;
-	char	*right;
-
-	end = *i + ft_strlen(dollar->key);
-	left = ft_substr((*str)->str, 0, *i);
-	right = ft_substr((*str)->str, end + 1, ft_strlen((*str)->str) - end);
-	if (!dollar->value)
-	{
-		if (ft_strcmp(dollar->key, "?") == 0)
-			dollar->value = ft_itoa(state->status);
-		else if (ft_strcmp(dollar->key, "0") == 0)
-			dollar->value = ft_strdup("minishell");
-		else
-			dollar->value = ft_strdup("");
-		*i = *i - 1;
-	}
-	else
-		dollar->value = ft_strdup(dollar->value);
-	(*str)->str = ft_strjoin(left, dollar->value);
-	(*str)->str = ft_strjoin((*str)->str, right);
-	free(left);
-	free(right);
 }

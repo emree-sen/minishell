@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   variables.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:43 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:10:44 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 t_variables	*variables_new(char *key, char *value)
@@ -59,7 +71,7 @@ void	variables_del(t_variables *var)
 	free(var);
 }
 
-void new_variable_adder(t_variables *var_root, char *key, char *value)
+void	new_variable_adder(t_variables *var_root, char *key, char *value)
 {
 	t_variables	*new;
 

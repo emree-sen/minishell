@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   token_sep_by_pipe.c                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/09/14 10:10:32 by emsen             #+#    #+#             */
+/*   Updated: 2024/09/14 10:10:33 by emsen            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mini.h"
 
 t_token	*copy_token_list(t_token *start, t_token *end)
@@ -13,7 +25,6 @@ t_token	*copy_token_list(t_token *start, t_token *end)
 	while (current != end)
 	{
 		new_token = token_new(current->str, current->type);
-		printf("%p\n", new_token);
 		if (!new_token)
 			return (NULL);
 		if (!new_list)
