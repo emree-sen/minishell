@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:57 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 16:36:42 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/14 16:49:09 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	ft_print_token_arr(t_token **token)
 }
 
 void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
-{	
+{
 	if (check_the_syntax(line))
 	{
 		state->status = 258;
@@ -66,15 +66,12 @@ void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 
 void	process_line(char *line, t_state *state, t_variables *var_root)
 {
-	t_token		*root;
-	
-	state->token_arr = NULL;	
+	t_token	*root;
+
+	state->token_arr = NULL;
 	lexer(line, &root, var_root, state);
-	// printf("status: %d\n", state->status);
 	if (state->token_arr)
 		executor(state, var_root);
-	// ft_print_token_arr(state->token_arr);
-	// printf("status: %d\n", state->status);
 	if (state->token_arr)
 		cleanup(state, root, NULL);
 }

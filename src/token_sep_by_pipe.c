@@ -6,13 +6,13 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:32 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 16:36:01 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/14 16:41:19 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mini.h"
 
-void ft_free_token(t_token *token)
+void	ft_free_token(t_token *token)
 {
 	if (token)
 	{
@@ -54,7 +54,7 @@ void	ft_free_token_array(t_token **token_arr, int size)
 	int		i;
 	t_token	*tmp;
 	t_token	*tmp2;
-	
+
 	i = 0;
 	while (token_arr && i < size - 1)
 	{
