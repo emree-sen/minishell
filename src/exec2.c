@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:33 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:09:34 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/14 13:31:28 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,8 @@ void	exit_num(int ex_num)
 		exit(126);
 	else if (ex_num == 1271)
 		exit(127);
+	else if (ex_num == 258)
+		exit(258);
 	else
 		exit(1);
 }

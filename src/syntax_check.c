@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:26 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:27 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/14 15:49:26 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,5 +89,5 @@ int	check_the_syntax(char *input)
 		return (print_unexpected_char_error());
 	if (redirect_check(input) != 0)
 		return (print_syntax_error_redir());
-	return (1);
+	return (0);
 }

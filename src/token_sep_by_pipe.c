@@ -6,11 +6,20 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:32 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:33 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/14 16:36:01 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mini.h"
+
+void ft_free_token(t_token *token)
+{
+	if (token)
+	{
+		free(token->str);
+		free(token);
+	}
+}
 
 t_token	*copy_token_list(t_token *start, t_token *end)
 {
@@ -38,6 +47,29 @@ t_token	*copy_token_list(t_token *start, t_token *end)
 		current = current->next;
 	}
 	return (new_list);
+}
+
+void	ft_free_token_array(t_token **token_arr, int size)
+{
+	int		i;
+	t_token	*tmp;
+	t_token	*tmp2;
+	
+	i = 0;
+	while (token_arr && i < size - 1)
+	{
+		tmp = token_arr[i];
+		while (tmp)
+		{
+			tmp2 = tmp;
+			tmp = tmp->next;
+			if (strcmp(tmp2->str, "|") != 0)
+				ft_free_token(tmp2);
+		}
+		i++;
+	}
+	if (token_arr)
+		free(token_arr);
 }
 
 t_token	**add_to_token_list_array(t_token **token_list_array,
