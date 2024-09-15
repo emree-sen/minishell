@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:57 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 16:49:09 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 18:52:25 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,48 @@ void	ft_print_token_arr(t_token **token)
 	}
 }
 
+void token_meta_type_changer_2(t_token *tmp)
+{
+	int	i;
+
+	i = 0;
+	while (tmp->str[i])
+	{
+		if (tmp->str[i] == '|')
+			tmp->type = PIPE;
+		else if (tmp->str[i] == '>')
+		{
+			if (tmp->str[i + 1] == '>')
+				tmp->type = REDRR;
+			else
+				tmp->type = REDR;
+		}
+		else if (tmp->str[i] == '<')
+		{
+			if (tmp->str[i + 1] == '<')
+				tmp->type = REDLL;
+			else
+				tmp->type = REDL;
+		}
+		else
+			tmp->type = NONE;
+		i++;
+	}
+}
+
+void meta_type_changer(t_token **root)
+{
+	t_token	*tmp;
+
+	tmp = *root;
+	while (tmp)
+	{
+		token_meta_type_changer_2(tmp);
+		tmp = tmp->next;
+	}
+	
+}
+
 void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 {
 	if (check_the_syntax(line))
@@ -58,11 +100,17 @@ void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 	}
 	*root = str_to_token(line);
 	token_extract_all_meta(root);
+
+
 	token_split_dollars(root, var_root, state);
+
+	//meta_type_changer(root);
 	token_del_quote(*root);
 	state->token_arr = token_separate_by_pipe(*root);
 	token_arr_set_type(state->token_arr);
+	//ft_print_token_arr(root);
 }
+
 
 void	process_line(char *line, t_state *state, t_variables *var_root)
 {
@@ -70,6 +118,7 @@ void	process_line(char *line, t_state *state, t_variables *var_root)
 
 	state->token_arr = NULL;
 	lexer(line, &root, var_root, state);
+
 	if (state->token_arr)
 		executor(state, var_root);
 	if (state->token_arr)

@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:14 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:15 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 17:01:52 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	set_token_type(t_token *token, int *flag)
 {
 	if (ft_strcmp(token->str, "|") == 0)
 		token->type = PIPE;
-	else if (ft_strcmp(token->str, ">") == 0)
+	else if (ft_strcmp(token->str, ">" ) == 0)
 		token->type = REDR;
 	else if (ft_strcmp(token->str, "<") == 0)
 		token->type = REDL;

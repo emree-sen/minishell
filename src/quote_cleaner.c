@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:11 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:12 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 17:23:08 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ char	*token_dup_quote(t_token *tmp, int *flag, int i, int j)
 	char	*str;
 
 	str = (char *)malloc(sizeof(char) * (ft_strlen(tmp->str) + 1));
+
 	while (tmp->str[i])
 	{
 		while (tmp->str[i] && ((tmp->str[i] != '\'' && tmp->str[i] != '\"')))
@@ -29,7 +30,9 @@ char	*token_dup_quote(t_token *tmp, int *flag, int i, int j)
 		{
 			toggle_quote(flag, tmp->str[i]);
 			if (*flag != -1)
+			{
 				str[j++] = tmp->str[i++];
+			}
 			else
 				i++;
 		}
@@ -45,7 +48,9 @@ void	token_quote_detective(t_token *tmp)
 
 	flag = -1;
 	str = token_dup_quote(tmp, &flag, 0, 0);
+	free(tmp->str);
 	tmp->str = ft_strdup(str);
+	free(str);
 }
 
 void	token_del_quote(t_token *token_root)
@@ -55,8 +60,10 @@ void	token_del_quote(t_token *token_root)
 	tmp = token_root;
 	while (tmp)
 	{
+
 		if (is_has_quote(tmp->str))
 			token_quote_detective(tmp);
+		
 		tmp = tmp->next;
 	}
 }

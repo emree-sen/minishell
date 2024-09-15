@@ -1,7 +1,7 @@
 NAME = minishell
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address 
+CFLAGS = -Wall -Wextra -Werror -g #fsanitize=address 
 LIBFT_PATH = libft
 LIBFT = libft/libft.a
 SRCS = src/lexer.c src/token.c src/token2.c src/set_type.c \

@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:23 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 14:38:59 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 18:13:19 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,16 +49,19 @@ t_token	*str_to_token(char *str)
 	t_token	*token;
 	int		i;
 	int		start;
-
+	char	*tmp;
+	
 	i = 0;
 	root = NULL;
+	token = NULL;
 	is_null(str);
 	str = ft_strtrim(str, " ");
 	while (str[i])
 	{
 		start = pass_any(str, &i, ' ');
 		pass_quote_or_any(str, &i);
-		token = token_new(ft_substr(str, start, i - start), NONE);
+		tmp = ft_substr(str, start, i - start);
+		token = token_new(tmp, NONE);
 		token_add_last(&root, token);
 	}
 	return (free(str), root);

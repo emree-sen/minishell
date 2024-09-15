@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:27 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 15:33:35 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 18:04:12 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,14 +60,17 @@ void	ft_relavite_path(char *cmd, char **paths, t_exec *exec)
 void	path_finder(char *cmd, t_variables *var_root, t_exec *exec)
 {
 	char	**paths;
-
-	paths = ft_split(ft_getenv("PATH", var_root), ':');
+	char	*elma;
+	
+	elma = ft_getenv("PATH", var_root);
+	paths = ft_split(elma, ':');
 	if (!paths)
 		return ;
 	if (is_has_slash(cmd))
 		ft_absoulte_path(cmd, exec);
 	else
 		ft_relavite_path(cmd, paths, exec);
+	// free(elma);
 }
 
 char	**args_filler(t_token *tmp, char *path)

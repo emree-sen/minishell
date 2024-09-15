@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:20 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:21 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 18:59:49 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 	int			start;
 	int			end;
 	char		*value;
-	t_variables	*var_tmp;
+	// t_variables	*var_tmp;
 
 	value = NULL;
 	start = dollar->i;
@@ -78,8 +78,7 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 		dollar->key = ft_substr(tmp->str, start + 1, end - start - 1);
 	else
 		dollar->key = ft_strdup("?");
-	var_tmp = var_root;
-	all_token_value_checker(var_tmp, dollar, &value);
+	all_token_value_checker(var_root, dollar, &value);
 	return (value);
 }
 
@@ -88,7 +87,9 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 {
 	t_token		*tmp;
 	t_dollar	d;
+	int		i;
 
+	i = -1;
 	d.value = NULL;
 	d.flag = -1;
 	d.flag2 = -1;
@@ -99,6 +100,7 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 		while (tmp->str[++d.i])
 		{
 			toggle_single_quote(&d.flag, tmp->str[d.i], &d.flag2);
+
 			if (d.flag == -1 && tmp->str[d.i] == '$' && tmp->str[d.i
 					+ 1] != '\"' && tmp->str[d.i + 1] != '\'' && tmp->str[d.i
 					+ 1] != '\0' && tmp->str[d.i + 1] != '$' && tmp->str[d.i
@@ -106,9 +108,13 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 			{
 				d.value = token_value_finder(tmp, &d, var_root);
 				token_replace_value(&tmp, &d, &d.i, state);
-			}
+
+			}	
 		}
+
 		tmp = tmp->next;
 	}
 	token_extract_spaces(token_root);
+
+
 }
