@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:36 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 15:26:33 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/15 13:49:55 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,8 +211,8 @@ void	executor(t_state *state, t_variables *var_root)
 
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
-	ft_print_exec_errors(exec, state);
 	execute_heredocs(exec);
+	ft_print_exec_errors(exec, state);
 	fds = prepare_fds(state);
 	pid = malloc(sizeof(pid_t) * state->arr_len);
 	params.exec = exec;
