@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:10 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 15:19:52 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 19:07:58 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	is_just_n(char *str)
 	i = 0;
 	while (str[i])
 	{
-		if (str[i] == '-' && i == 0)
+		if (str[i] == '-' && i == 0 && ft_strlen(str) > 1)
 		{
 			i++;
 			continue ;

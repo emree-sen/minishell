@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:03 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:19:54 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:56:14 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,21 +96,20 @@ typedef struct s_state
 
 typedef struct s_exec
 {
-	char	*path; // -> /bin/ls
-	char	**args; // -> ["/bin/ls", "-l", "-a", NULL]
-	char	*input_file; // -> NULL, file.txt
-	char	*output_file; // -> NULL, file.txt
-	int		in_fd; // -> 0, 3
-	int		out_fd; // -> 1, 4
-	int		output_type; // -> file_input, herdoc, none
-	char	**heredocs; // -> {"a", "b", NULL}
+	char	*path;
+	char	**args;
+	char	*input_file;
+	char	*output_file;
+	int		in_fd;
+	int		out_fd;
+	int		output_type;
+	char	**heredocs;
 	int		heredoc_idx;
 	int		in_type;
 	int		cmd_type;
 	int		err_val;
 	char	*err_str;
 }	t_exec;
-// execve("/bin/ls", ["/bin/ls", "-l", "-a", NULL], envp);
 
 typedef struct s_exec_params
 {
@@ -120,7 +119,6 @@ typedef struct s_exec_params
 	int				**fds;
 }	t_exec_params;
 
-//hazırlık
 t_token		*token_new(char *str, t_token_type type);
 void		token_del(t_token *token);
 void		token_add_last(t_token **root, t_token *token);
@@ -142,11 +140,7 @@ int			pass_any(char *str, int *ai, char any);
 void		toggle_quote(int *quote, char c);
 void		toggle_single_quote(int *quote, char c, int *fl);
 int			is_only_quote(char *str);
-//stryi alıp GERÇEK boşluklara göre link list'e yerleştirecek, halkın adamı!
-// tokeni fonksiyonda oluştur. 
 t_token		*str_to_token(char *str);
-
-// str_to_token'den gelen link list'i meta karakterlere göre değiştirecek
 int			is_has_meta(char *str);
 int			is_only_meta(char *str);
 void		token_extract_all_meta(t_token **token_root);
@@ -157,12 +151,6 @@ void		token_extract_creator(t_token *tmp, t_token **token_root,
 void		token_meta_type_changer(t_token *tmp, int i);
 void		token_new_add_prev(t_token **token_root, t_token *tmp,
 				t_token *new, int *i);
-
-/* dolar işaretlerini değişken içerikleriyle değiştir.
-Bunun için variables structını kullan 
-bu işlemden sonra gerçek boşluk ayırmaya tekrar ihtiyaç
-olabileceğinden root pointer'ı verilir*/
-
 void		token_split_dollars(t_token **token_root,
 				t_variables *var_root, t_state *state);
 t_variables	*dup_veriables(char **environ);
@@ -171,19 +159,13 @@ void		token_replace_value(t_token **token_root,
 char		*token_value_finder(t_token *tmp, t_dollar *dollar,
 				t_variables *var_root);
 void		token_value_checker(t_variables *var_tmp, char *key, char **value);
-
-//dolar sonrası space kontrolü
 void		token_extract_spaces(t_token **token_root);
 void		token_extract_sp_creator(t_token *tmp,
 				t_token **token_root, t_token *new, int i);
-
-// gereksiz tırnakları temizler
 void		token_del_quote(t_token *token_root);
 void		token_quote_detective(t_token *tmp);
 char		*token_dup_quote(t_token *tmp, int *flag, int i, int j);
 int			is_has_quote(char *str);
-
-// token listesini pipe + 1 parçaya ayırıp listesini döner
 t_token		*copy_token_list(t_token *start, t_token *end);
 t_token		**add_to_token_list_array(t_token **token_list_array,
 				t_token *new_list, int *size);
@@ -192,13 +174,10 @@ void		process_tokens(t_token *start, t_token *current,
 				t_token ***separated_lists, int *size);
 t_token		**finalize_token_array(t_token **list_array, int size);
 t_token		**token_separate_by_pipe(t_token *token_root, int i);
-// token listesini anlamlı parçalar olarak tanımlar
 void		set_token_type(t_token *token, int *flag);
 void		handle_redirection(t_token **token);
 void		token_arr_set_type(t_token **token_arr);
 void		is_null(char *str);
-
-//syntax kontrol
 int			check_the_syntax(char *input);
 int			is_pipe_first(char *input);
 int			is_pipe_last(char *input);
@@ -217,8 +196,6 @@ int			mixed_redir_two(char *input);
 int			mixed_redir_three(char *input);
 int			mixed_redir_four(char *input);
 int			last_arg_is_redir(char *input);
-
-// exec
 void		state_arr_len_set(t_state *state);
 int			*heredoc_create(t_state *state);
 void		heredoc_setter(t_exec *exec);
