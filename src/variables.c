@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:43 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 15:37:04 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:44:58 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,31 +74,4 @@ void	variables_del(t_variables *var)
 	free(var->key);
 	free(var->value);
 	free(var);
-}
-
-void key_searcher(t_variables *var_root, char *key)
-{
-	t_variables	*tmp;
-
-	tmp = var_root;
-	while (tmp)
-	{
-		if (!ft_strcmp(tmp->key, key))
-		{
-			variables_del(tmp);
-			break ;
-		}
-		tmp = tmp->next;
-	}
-}
-
-void	new_variable_adder(t_variables *var_root, char *key, char *value)
-{
-	t_variables	*new;
-	
-	key_searcher(var_root, key);
-	new = variables_new(key, value);
-	free(key);
-	free(value);
-	variables_add_last(&var_root, new);
 }

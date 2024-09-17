@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:55 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/15 17:46:33 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:20:30 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	init_redr(t_token *tmp, t_exec *exec)
 		exec->err_val = 1;
 		exec->err_str = ft_strdup(strerror(errno));
 	}
-	free(exec->output_file); // DIKKKKKKKAAAAATTTTTT YENI EKLENDI HER ŞEYİ BOZABİLİR
+	free(exec->output_file);
 }
 
 void	init_redrr(t_token *tmp, t_exec *exec)

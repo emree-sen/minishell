@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:03 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/16 19:17:07 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:19:54 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,7 @@ t_token		**finalize_token_list_array(t_token **list_array, int size);
 void		process_tokens(t_token *start, t_token *current,
 				t_token ***separated_lists, int *size);
 t_token		**finalize_token_array(t_token **list_array, int size);
-t_token		**token_separate_by_pipe(t_token *token_root);
+t_token		**token_separate_by_pipe(t_token *token_root, int i);
 // token listesini anlamlı parçalar olarak tanımlar
 void		set_token_type(t_token *token, int *flag);
 void		handle_redirection(t_token **token);
@@ -276,10 +276,14 @@ void		execute_multi_command(t_exec_params *params, int i);
 void		execute_heredocs(t_exec **exec);
 int			**prepare_fds(t_state *state);
 void		wait_for_children(pid_t *pid, t_state *state);
-void		free_resources(t_exec **exec, pid_t *pid, int **fds, \
+void		free_resources(t_exec **exec, pid_t *pid, int **fds,
 				t_state *state);
 void		execute_single_builtin(t_exec **exec, t_state *state,
 				t_variables *var_root, int i);
 void		ft_print_token_arr(t_token **token);
+int			is_alporund(char *str);
+int			token_arr_len(t_token *token);
+void		initialize_state(t_state *state, t_variables **var_root);
+void		process_line(char *line, t_state *state, t_variables *var_root);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:11 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/15 17:23:08 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:15:00 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ char	*token_dup_quote(t_token *tmp, int *flag, int i, int j)
 	char	*str;
 
 	str = (char *)malloc(sizeof(char) * (ft_strlen(tmp->str) + 1));
-
 	while (tmp->str[i])
 	{
 		while (tmp->str[i] && ((tmp->str[i] != '\'' && tmp->str[i] != '\"')))
@@ -60,10 +59,8 @@ void	token_del_quote(t_token *token_root)
 	tmp = token_root;
 	while (tmp)
 	{
-
 		if (is_has_quote(tmp->str))
 			token_quote_detective(tmp);
-		
 		tmp = tmp->next;
 	}
 }

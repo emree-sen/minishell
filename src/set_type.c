@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:14 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 12:12:19 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:14:25 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	set_token_type(t_token *token, int *flag)
 		*flag = 1;
 	}
 	else if (*flag == 1 && token->type == NONE)
-		token->type = ARG;	
+		token->type = ARG;
 }
 
 void	handle_redirection(t_token **token)

@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:23 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/15 18:13:19 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:40:22 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ t_token	*str_to_token(char *str)
 	int		i;
 	int		start;
 	char	*tmp;
-	
+
 	i = 0;
 	root = NULL;
 	token = NULL;

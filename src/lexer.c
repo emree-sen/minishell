@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:57 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 16:25:06 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:20:16 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,68 +30,7 @@ void	cleanup(t_state *state, t_token *root, char *line)
 		free(line);
 }
 
-void	ft_print_token_arr(t_token **token)
-{
-	int		i;
-	t_token	*tmp;
-
-	i = 0;
-	while (token[i])
-	{
-		tmp = token[i];
-		while (tmp)
-		{
-			printf("str: %s, type: %d\n", tmp->str, tmp->type);
-			printf("tmp: %p\n", tmp);
-			tmp = tmp->next;
-		}
-		i++;
-	}
-}
-
-void token_meta_type_changer_2(t_token *tmp)
-{
-	int	i;
-
-	i = 0;
-	while (tmp->str[i])
-	{
-		if (tmp->str[i] == '|')
-			tmp->type = PIPE;
-		else if (tmp->str[i] == '>')
-		{
-			if (tmp->str[i + 1] == '>')
-				tmp->type = REDRR;
-			else
-				tmp->type = REDR;
-		}
-		else if (tmp->str[i] == '<')
-		{
-			if (tmp->str[i + 1] == '<')
-				tmp->type = REDLL;
-			else
-				tmp->type = REDL;
-		}
-		else
-			tmp->type = NONE;
-		i++;
-	}
-}
-
-void meta_type_changer(t_token **root)
-{
-	t_token	*tmp;
-
-	tmp = *root;
-	while (tmp)
-	{
-		token_meta_type_changer_2(tmp);
-		tmp = tmp->next;
-	}
-	
-}
-
-int just_spaces(char *line)
+int	just_spaces_check(char *line)
 {
 	int	i;
 
@@ -107,7 +46,7 @@ int just_spaces(char *line)
 
 void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 {
-	if (ft_strlen(line) != 0 && just_spaces(line) == 0)
+	if (ft_strlen(line) != 0 && just_spaces_check(line) == 0)
 	{
 		if (check_the_syntax(line))
 		{
@@ -119,10 +58,9 @@ void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 	token_extract_all_meta(root);
 	token_split_dollars(root, var_root, state);
 	token_del_quote(*root);
-	state->token_arr = token_separate_by_pipe(*root);
+	state->token_arr = token_separate_by_pipe(*root, 0);
 	token_arr_set_type(state->token_arr);
 }
-
 
 void	process_line(char *line, t_state *state, t_variables *var_root)
 {
@@ -134,27 +72,4 @@ void	process_line(char *line, t_state *state, t_variables *var_root)
 		executor(state, var_root);
 	if (state->token_arr)
 		cleanup(state, root, NULL);
-}
-
-int	main(void)
-{
-	t_state		state;
-	t_variables	*var_root;
-	char		*line;
-
-	initialize_state(&state, &var_root);
-	while (1)
-	{
-		line = readline("minishell$ ");
-		if (!line)
-		{
-			printf("exit\n");
-			break ;
-		}
-		add_history(line);
-		process_line(line, &state, var_root);
-		free(line);
-	}
-	ft_free_var_root(var_root);
-	return (0);
 }

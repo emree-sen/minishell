@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:06 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 17:30:39 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:29:19 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int	is_alporund(char *str)
 	return (1);
 }
 
-int token_arr_len(t_token *token)
+int	token_arr_len(t_token *token)
 {
 	int	i;
 
@@ -42,42 +42,6 @@ int token_arr_len(t_token *token)
 		token = token->next;
 	}
 	return (i);
-}
-
-void new_export_variable(t_variables *var_root, char *str)
-{
-	if (!ft_isdigit(str[0]) && is_alporund(str) == 0)
-	{
-		if (ft_strchr(str, '='))
-			new_variable_adder(var_root, ft_substr(str, 0,
-					ft_strchr(str, '=') - str),
-				ft_substr(str, ft_strchr(str, '=') \
-				- str + 1, ft_strlen(str)));
-	}
-	else
-	{
-		write(2, "minishell: export: `", 20);
-		write(2, str, ft_strlen(str));
-		write(2, "': not a valid identifier\n", 26);
-	}
-}
-
-void	ft_export(t_state *state, t_variables *var_root, int i)
-{
-	t_token	*tmp;
-
-	if (token_arr_len(state->token_arr[i]) == 1)
-	{
-		ft_env(var_root);
-		return ;
-	}
-	tmp = state->token_arr[i];
-	while (tmp)
-	{
-		if (tmp->type == ARG)
-			new_export_variable(var_root, tmp->str);
-		tmp = tmp->next;
-	}
 }
 
 void	variable_deler(t_variables **var_root, char *key)
