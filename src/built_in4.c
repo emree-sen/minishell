@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 18:11:39 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:29:14 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 19:15:13 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	new_variable_adder(t_variables *var_root, char *key, char *value)
 	variables_add_last(&var_root, new);
 }
 
-void	new_export_variable(t_variables *var_root, char *str)
+void	new_export_variable(t_variables *var_root, char *str, t_state *state)
 {
 	if (!ft_isdigit(str[0]) && is_alporund(str) == 0)
 	{
@@ -51,6 +51,7 @@ void	new_export_variable(t_variables *var_root, char *str)
 	}
 	else
 	{
+		state->status = 1;
 		write(2, "minishell: export: `", 20);
 		write(2, str, ft_strlen(str));
 		write(2, "': not a valid identifier\n", 26);
@@ -70,7 +71,7 @@ void	ft_export(t_state *state, t_variables *var_root, int i)
 	while (tmp)
 	{
 		if (tmp->type == ARG)
-			new_export_variable(var_root, tmp->str);
+			new_export_variable(var_root, tmp->str, state);
 		tmp = tmp->next;
 	}
 }

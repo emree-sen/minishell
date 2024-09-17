@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:06 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:29:19 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 19:11:25 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,8 @@ void	ft_unset(t_variables *var_root, t_state *state, int i)
 	{
 		if (token->type == ARG)
 		{
-			if (ft_isalpha(token->str[0]) || token->str[0] == '_'
-				|| ft_strchr(token->str, '=') == NULL)
+			if ((ft_isalpha(token->str[0]) || token->str[0] == '_')
+				&& ft_strchr(token->str, '=') == NULL)
 				variable_deler(&var_root, token->str);
 			else
 			{
