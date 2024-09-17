@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:06 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/16 18:49:23 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:30:39 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,31 +31,51 @@ int	is_alporund(char *str)
 	return (1);
 }
 
+int token_arr_len(t_token *token)
+{
+	int	i;
+
+	i = 0;
+	while (token)
+	{
+		i++;
+		token = token->next;
+	}
+	return (i);
+}
+
+void new_export_variable(t_variables *var_root, char *str)
+{
+	if (!ft_isdigit(str[0]) && is_alporund(str) == 0)
+	{
+		if (ft_strchr(str, '='))
+			new_variable_adder(var_root, ft_substr(str, 0,
+					ft_strchr(str, '=') - str),
+				ft_substr(str, ft_strchr(str, '=') \
+				- str + 1, ft_strlen(str)));
+	}
+	else
+	{
+		write(2, "minishell: export: `", 20);
+		write(2, str, ft_strlen(str));
+		write(2, "': not a valid identifier\n", 26);
+	}
+}
+
 void	ft_export(t_state *state, t_variables *var_root, int i)
 {
 	t_token	*tmp;
 
+	if (token_arr_len(state->token_arr[i]) == 1)
+	{
+		ft_env(var_root);
+		return ;
+	}
 	tmp = state->token_arr[i];
 	while (tmp)
 	{
 		if (tmp->type == ARG)
-		{
-			if (!ft_isdigit(tmp->str[0]) && is_alporund(tmp->str) == 0)
-			{
-				if (ft_strchr(tmp->str, '='))
-					new_variable_adder(var_root, ft_substr(tmp->str, 0,
-							ft_strchr(tmp->str, '=') - tmp->str),
-						ft_substr(tmp->str, ft_strchr(tmp->str, '=') \
-							- tmp->str + 1, ft_strlen(tmp->str)));
-			}
-			else
-			{
-				write(2, "minishell: export: `", 20);
-				write(2, tmp->str, ft_strlen(tmp->str));
-				write(2, "': not a valid identifier\n", 26);
-				state->status = 1;
-			}
-		}
+			new_export_variable(var_root, tmp->str);
 		tmp = tmp->next;
 	}
 }

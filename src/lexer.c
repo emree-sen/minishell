@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:57 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 13:24:15 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 16:25:06 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,23 @@ void meta_type_changer(t_token **root)
 	
 }
 
+int just_spaces(char *line)
+{
+	int	i;
+
+	i = 0;
+	while (line[i])
+	{
+		if (line[i] != ' ')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 {
-	if (ft_strlen(line) != 0)
+	if (ft_strlen(line) != 0 && just_spaces(line) == 0)
 	{
 		if (check_the_syntax(line))
 		{
