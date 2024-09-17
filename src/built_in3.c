@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:10 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:09:11 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 15:19:52 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,5 +122,6 @@ void	ft_cd(char **args, t_state *state, t_variables *var_root)
 	}
 	if (args[1])
 		chdir_check(args, state, var_root, oldpwd);
-	env_node_updater(var_root, "PWD", getcwd(NULL, 0));
+	env_node_updater(var_root, "PWD", oldpwd);
+	free(oldpwd);
 }

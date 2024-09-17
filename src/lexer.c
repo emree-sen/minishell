@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:57 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/15 18:52:25 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 13:24:15 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,22 +93,20 @@ void meta_type_changer(t_token **root)
 
 void	lexer(char *line, t_token **root, t_variables *var_root, t_state *state)
 {
-	if (check_the_syntax(line))
+	if (ft_strlen(line) != 0)
 	{
-		state->status = 258;
-		return ;
+		if (check_the_syntax(line))
+		{
+			state->status = 258;
+			return ;
+		}
 	}
 	*root = str_to_token(line);
 	token_extract_all_meta(root);
-
-
 	token_split_dollars(root, var_root, state);
-
-	//meta_type_changer(root);
 	token_del_quote(*root);
 	state->token_arr = token_separate_by_pipe(*root);
 	token_arr_set_type(state->token_arr);
-	//ft_print_token_arr(root);
 }
 
 
@@ -118,7 +116,6 @@ void	process_line(char *line, t_state *state, t_variables *var_root)
 
 	state->token_arr = NULL;
 	lexer(line, &root, var_root, state);
-
 	if (state->token_arr)
 		executor(state, var_root);
 	if (state->token_arr)

@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:20 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/15 18:59:49 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 14:15:53 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ t_variables	*dup_veriables(char **environ)
 		key = ft_substr(environ[i], 0, ft_strchr(environ[i], '=') - environ[i]);
 		value = ft_strdup(ft_strchr(environ[i], '=') + 1);
 		variables = variables_new(key, value);
-		variables->line = ft_strdup(environ[i]);
 		variables_add_last(&root, variables);
 		free(key);
 		free(value);
@@ -60,7 +59,6 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 	int			start;
 	int			end;
 	char		*value;
-	// t_variables	*var_tmp;
 
 	value = NULL;
 	start = dollar->i;
@@ -82,6 +80,26 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 	return (value);
 }
 
+void print_token_root(t_token *token_root)
+{
+	t_token *tmp;
+
+	tmp = token_root;
+	while (tmp)
+	{
+		printf("str: %s\n", tmp->str);
+		tmp = tmp->next;
+	}
+}
+
+void free_dollar(t_dollar *d)
+{
+	if (d->value)
+		free(d->value);
+	if (d->key)
+		free(d->key);
+}
+
 void	token_split_dollars(t_token **token_root, t_variables *var_root,
 		t_state *state)
 {
@@ -90,17 +108,17 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 	int		i;
 
 	i = -1;
-	d.value = NULL;
-	d.flag = -1;
-	d.flag2 = -1;
 	tmp = *token_root;
 	while (tmp)
 	{
 		d.i = -1;
 		while (tmp->str[++d.i])
 		{
+			d.key = NULL;
+			d.value = NULL;
+			d.flag = -1;
+			d.flag2 = -1;
 			toggle_single_quote(&d.flag, tmp->str[d.i], &d.flag2);
-
 			if (d.flag == -1 && tmp->str[d.i] == '$' && tmp->str[d.i
 					+ 1] != '\"' && tmp->str[d.i + 1] != '\'' && tmp->str[d.i
 					+ 1] != '\0' && tmp->str[d.i + 1] != '$' && tmp->str[d.i
@@ -108,13 +126,10 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 			{
 				d.value = token_value_finder(tmp, &d, var_root);
 				token_replace_value(&tmp, &d, &d.i, state);
-
-			}	
+			}
+			free_dollar(&d);
 		}
-
 		tmp = tmp->next;
 	}
 	token_extract_spaces(token_root);
-
-
 }

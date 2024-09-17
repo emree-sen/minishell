@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:08 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:09 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 13:11:13 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ int	is_pipe_first(char *input)
 	{
 		i++;
 	}
-	if (input[i] == '|')
+	if (input[i] == '|' && input[i])
 	{
 		return (1);
 	}
@@ -36,7 +36,7 @@ int	is_pipe_last(char *input)
 	while (input[i])
 		i++;
 	i--;
-	while (input[i] == ' ')
+	while (input[i] && input[i] == ' ')
 		i--;
 	if (input[i] == '|')
 		return (1);
@@ -53,7 +53,7 @@ int	double_pipe(char *input)
 	while (input[i])
 	{
 		quote = pass_the_quotes(input[i], quote);
-		if ((input[i] == '|' && input[i + 1] == '|') && quote == 0)
+		if ((input[i] == '|' && (input[i + 1] == '|' && input[i + 1])) && quote == 0)
 			return (1);
 		i++;
 	}
