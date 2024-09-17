@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:55 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:20:30 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 19:30:30 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ void	init_heredoc(t_token *tmp, t_exec *exec)
 
 void	init_redr(t_token *tmp, t_exec *exec)
 {
+	char	*tmp_str;
+
 	exec->output_file = ft_strdup(tmp->next->str);
 	exec->output_type = REDR;
 	exec->out_fd = open(exec->output_file,
@@ -35,13 +37,17 @@ void	init_redr(t_token *tmp, t_exec *exec)
 	if (exec->out_fd == -1)
 	{
 		exec->err_val = 1;
+		tmp_str = strerror(errno);
 		exec->err_str = ft_strdup(strerror(errno));
+		free(tmp_str);
 	}
 	free(exec->output_file);
 }
 
 void	init_redrr(t_token *tmp, t_exec *exec)
 {
+	char	*tmp_str;
+
 	exec->output_file = ft_strdup(tmp->next->str);
 	exec->output_type = REDRR;
 	exec->out_fd = open(exec->output_file,
@@ -49,20 +55,26 @@ void	init_redrr(t_token *tmp, t_exec *exec)
 	if (exec->out_fd == -1)
 	{
 		exec->err_val = 1;
+		tmp_str = strerror(errno);
 		exec->err_str = ft_strdup(strerror(errno));
+		free(tmp_str);
 	}
 	free(exec->output_file);
 }
 
 void	init_redll(t_token *tmp, t_exec *exec)
 {
+	char	*tmp_str;
+
 	exec->in_type = REDLL;
 	exec->input_file = ft_strdup(tmp->next->str);
 	exec->in_fd = open(exec->input_file, O_RDONLY);
 	if (exec->in_fd == -1)
 	{
 		exec->err_val = 1;
+		tmp_str = strerror(errno);
 		exec->err_str = ft_strdup(strerror(errno));
+		free(tmp_str);
 	}
 	free(exec->input_file);
 }
