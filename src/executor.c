@@ -6,127 +6,11 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:36 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 15:26:33 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:24:14 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mini.h"
-
-void	state_arr_len_set(t_state *state)
-{
-	int	i;
-
-	i = 0;
-	while (state->token_arr[i])
-		i++;
-	state->arr_len = i;
-}
-
-// void	printer(t_exec *exec)
-// {
-// 	printf("input_file: %s\n", exec->input_file);
-// 	printf("in_fd: %d\n", exec->in_fd);
-// 	printf("output_file: %s\n", exec->output_file);
-// 	printf("out_fd: %d\n", exec->out_fd);
-// }
-
-// void	exec_print(t_exec **exec)
-// {
-// 	int	i;
-// 	int	j;
-
-// 	i = 0;
-// 	while (exec[i])
-// 	{
-// 		j = 0;
-// 		if (exec[i]->path != NULL)
-// 			printf("path: %s\n", exec[i]->path);
-// 		while (exec[i]->args != NULL && exec[i]->args[j])
-// 		{
-// 			if (exec[i]->args != NULL)
-// 				printf("args: %s\n", exec[i]->args[j]);
-// 			j++;
-// 		}
-// 		j = 0;
-// 		while (exec[i]->heredocs != NULL && exec[i]->heredocs[j])
-// 		{
-// 			if (exec[i]->heredocs != NULL)
-// 				printf("heredocs: %s\n", exec[i]->heredocs[j]);
-// 			j++;
-// 		}
-// 		printer(exec[i]);
-// 		i++;
-// 	}
-// }
-
-void	execute_heredocs(t_exec **exec)
-{
-	int	i;
-
-	i = 0;
-	while (exec[i])
-	{
-		heredoc_setter(exec[i]);
-		i++;
-	}
-}
-
-int	**prepare_fds(t_state *state)
-{
-	if (state->arr_len > 1)
-		return (fds_filler(NULL, state));
-	return (NULL);
-}
-
-void	execute_single_builtin(t_exec **exec, t_state *state,
-		t_variables *var_root, int i)
-{
-	int	tmp_fd;
-
-	if (exec[i]->err_val != 0)
-	{
-		state->status = 1;
-		return ;
-	}
-	tmp_fd = dup(1);
-	if (exec[i]->out_fd != -1)
-		dup2(exec[i]->out_fd, 1);
-	single_command_built_in(exec, state, var_root, i);
-	if (exec[i]->out_fd != -1)
-		dup2(tmp_fd, 1);
-}
-
-void	execute_commands(t_exec_params *params, pid_t *pid)
-{
-	int	i;
-
-	i = 0;
-	while (i < params->state->arr_len)
-	{
-		if (params->state->arr_len == 1 && params->exec[i]->cmd_type == BUILTIN)
-		{
-			execute_single_builtin(params->exec, params->state,
-				params->var_root, i);
-			break ;
-		}
-		pid[i] = fork_process(params, i);
-		i++;
-	}
-}
-
-pid_t	fork_process(t_exec_params *params, int i)
-{
-	pid_t	pid;
-
-	pid = fork();
-	if (pid < 0)
-		exit(1);
-	else if (pid == 0)
-	{
-		handle_child_process(params, i);
-	}
-	return (pid);
-}
 
 void	handle_child_process(t_exec_params *params, int i)
 {
@@ -211,8 +95,8 @@ void	executor(t_state *state, t_variables *var_root)
 
 	state_arr_len_set(state);
 	exec = exec_filler(state, var_root);
-	ft_print_exec_errors(exec, state);
 	execute_heredocs(exec);
+	ft_print_exec_errors(exec, state);
 	fds = prepare_fds(state);
 	pid = malloc(sizeof(pid_t) * state->arr_len);
 	params.exec = exec;

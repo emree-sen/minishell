@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:55 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:09:56 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 13:09:48 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,9 @@ void	init_redr(t_token *tmp, t_exec *exec)
 	if (exec->out_fd == -1)
 	{
 		exec->err_val = 1;
-		exec->err_str = ft_strdup(strerror(errno));
+		exec->err_str = strerror(errno);
 	}
+	free(exec->output_file);
 }
 
 void	init_redrr(t_token *tmp, t_exec *exec)
@@ -48,8 +49,9 @@ void	init_redrr(t_token *tmp, t_exec *exec)
 	if (exec->out_fd == -1)
 	{
 		exec->err_val = 1;
-		exec->err_str = ft_strdup(strerror(errno));
+		exec->err_str = strerror(errno);
 	}
+	free(exec->output_file);
 }
 
 void	init_redll(t_token *tmp, t_exec *exec)
@@ -60,8 +62,9 @@ void	init_redll(t_token *tmp, t_exec *exec)
 	if (exec->in_fd == -1)
 	{
 		exec->err_val = 1;
-		exec->err_str = ft_strdup(strerror(errno));
+		exec->err_str = strerror(errno);
 	}
+	free(exec->input_file);
 }
 
 void	init_redirection(t_token *tmp, t_exec *exec)

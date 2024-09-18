@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:43 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:44 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:44:58 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 t_variables	*variables_new(char *key, char *value)
 {
 	t_variables	*variables;
+	char		*line;
 
 	variables = malloc(sizeof(t_variables));
 	if (!variables)
@@ -23,7 +24,9 @@ t_variables	*variables_new(char *key, char *value)
 	variables->value = ft_strdup(value);
 	variables->prev = NULL;
 	variables->next = NULL;
-	variables->line = NULL;
+	line = ft_strjoin(key, "=");
+	variables->line = ft_strjoin(line, value);
+	free(line);
 	return (variables);
 }
 
@@ -67,14 +70,8 @@ void	variables_del(t_variables *var)
 		var->next->prev = var->prev;
 	else
 		var->next = NULL;
+	free(var->line);
 	free(var->key);
+	free(var->value);
 	free(var);
-}
-
-void	new_variable_adder(t_variables *var_root, char *key, char *value)
-{
-	t_variables	*new;
-
-	new = variables_new(key, value);
-	variables_add_last(&var_root, new);
 }

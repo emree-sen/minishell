@@ -6,46 +6,14 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:20 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:21 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 12:04:03 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mini.h"
 
-void	token_value_checker(t_variables *var_tmp, char *key, char **value)
-{
-	if (!ft_strcmp(var_tmp->key, key))
-	{
-		*value = ft_strdup(var_tmp->value);
-		return ;
-	}
-}
-
-t_variables	*dup_veriables(char **environ)
-{
-	t_variables	*root;
-	t_variables	*variables;
-	int			i;
-	char		*key;
-	char		*value;
-
-	i = -1;
-	root = NULL;
-	while (environ[++i])
-	{
-		key = ft_substr(environ[i], 0, ft_strchr(environ[i], '=') - environ[i]);
-		value = ft_strdup(ft_strchr(environ[i], '=') + 1);
-		variables = variables_new(key, value);
-		variables->line = ft_strdup(environ[i]);
-		variables_add_last(&root, variables);
-		free(key);
-		free(value);
-	}
-	return (root);
-}
-
-void	all_token_value_checker(t_variables *var_tmp,
-			t_dollar *dollar, char **value)
+void	all_token_value_checker(t_variables *var_tmp, t_dollar *dollar,
+		char **value)
 {
 	while (var_tmp)
 	{
@@ -57,10 +25,9 @@ void	all_token_value_checker(t_variables *var_tmp,
 char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 		t_variables *var_root)
 {
-	int			start;
-	int			end;
-	char		*value;
-	t_variables	*var_tmp;
+	int		start;
+	int		end;
+	char	*value;
 
 	value = NULL;
 	start = dollar->i;
@@ -78,9 +45,28 @@ char	*token_value_finder(t_token *tmp, t_dollar *dollar,
 		dollar->key = ft_substr(tmp->str, start + 1, end - start - 1);
 	else
 		dollar->key = ft_strdup("?");
-	var_tmp = var_root;
-	all_token_value_checker(var_tmp, dollar, &value);
+	all_token_value_checker(var_root, dollar, &value);
 	return (value);
+}
+
+void	free_dollar(t_dollar *d)
+{
+	if (d->value)
+		free(d->value);
+	if (d->key)
+		free(d->key);
+}
+
+void	token_dollar_value_finder(t_dollar *d, t_token *tmp,
+		t_variables *var_root, t_state *state)
+{
+	if (d->flag == -1 && tmp->str[d->i] == '$' && tmp->str[d->i + 1] != '\"'
+		&& tmp->str[d->i + 1] != '\'' && tmp->str[d->i + 1] != '\0'
+		&& tmp->str[d->i + 1] != '$' && tmp->str[d->i + 1] != ' ')
+	{
+		d->value = token_value_finder(tmp, d, var_root);
+		token_replace_value(&tmp, d, &d->i, state);
+	}
 }
 
 void	token_split_dollars(t_token **token_root, t_variables *var_root,
@@ -89,24 +75,19 @@ void	token_split_dollars(t_token **token_root, t_variables *var_root,
 	t_token		*tmp;
 	t_dollar	d;
 
-	d.value = NULL;
-	d.flag = -1;
-	d.flag2 = -1;
 	tmp = *token_root;
 	while (tmp)
 	{
 		d.i = -1;
 		while (tmp->str[++d.i])
 		{
+			d.key = NULL;
+			d.value = NULL;
+			d.flag = -1;
+			d.flag2 = -1;
 			toggle_single_quote(&d.flag, tmp->str[d.i], &d.flag2);
-			if (d.flag == -1 && tmp->str[d.i] == '$' && tmp->str[d.i
-					+ 1] != '\"' && tmp->str[d.i + 1] != '\'' && tmp->str[d.i
-					+ 1] != '\0' && tmp->str[d.i + 1] != '$' && tmp->str[d.i
-					+ 1] != ' ')
-			{
-				d.value = token_value_finder(tmp, &d, var_root);
-				token_replace_value(&tmp, &d, &d.i, state);
-			}
+			token_dollar_value_finder(&d, tmp, var_root, state);
+			free_dollar(&d);
 		}
 		tmp = tmp->next;
 	}

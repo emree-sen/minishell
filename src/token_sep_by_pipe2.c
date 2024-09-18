@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:34 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 16:31:44 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:39:40 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,20 +38,16 @@ void	process_tokens(t_token *start, t_token *current,
 
 	new_list = copy_token_list(start, current);
 	if (new_list)
-	{
 		*sep_list = add_to_token_list_array(*sep_list, new_list, size);
-		
-	}
 }
 
-t_token	**token_separate_by_pipe(t_token *token_root)
+t_token	**token_separate_by_pipe(t_token *token_root, int size)
 {
 	t_token	**separated_lists;
 	t_token	*current;
 	t_token	*start;
-	int		size;
 	t_token	*tmp;
-	
+
 	separated_lists = NULL;
 	current = token_root;
 	start = token_root;

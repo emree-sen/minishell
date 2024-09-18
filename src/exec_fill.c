@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:25 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 15:31:28 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 13:10:30 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,5 +94,5 @@ t_exec	**exec_create(t_state *state)
 void	ft_set_error(t_exec *exec, int err)
 {
 	exec->err_val = err;
-	exec->err_str = ft_strdup(strerror(err));
+	exec->err_str = strerror(err);
 }

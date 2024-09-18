@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:33 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 13:31:28 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 13:22:12 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,6 @@ void	ft_free_exec(t_exec **exec)
 		j = 0;
 		while (exec[i]->heredocs && exec[i]->heredocs[j])
 			free(exec[i]->heredocs[j++]);
-		if (exec[i]->err_str)
-			free(exec[i]->err_str);
 		if (exec[i]->path)
 			free(exec[i]->path);
 		if (exec[i]->heredocs)

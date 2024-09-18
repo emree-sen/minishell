@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:17 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:10:18 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 17:40:41 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ void	token_replace_value(t_token **str, t_dollar *dollar, int *i,
 	int		end;
 	char	*left;
 	char	*right;
+	char	*tmp;
 
 	end = *i + ft_strlen(dollar->key);
 	left = ft_substr((*str)->str, 0, *i);
@@ -32,10 +33,11 @@ void	token_replace_value(t_token **str, t_dollar *dollar, int *i,
 			dollar->value = ft_strdup("");
 		*i = *i - 1;
 	}
-	else
-		dollar->value = ft_strdup(dollar->value);
+	free((*str)->str);
 	(*str)->str = ft_strjoin(left, dollar->value);
-	(*str)->str = ft_strjoin((*str)->str, right);
+	tmp = (*str)->str;
+	free((*str)->str);
+	(*str)->str = ft_strjoin(tmp, right);
 	free(left);
 	free(right);
 }

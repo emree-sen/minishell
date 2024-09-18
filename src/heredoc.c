@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:52 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:22:51 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:21:05 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,36 +29,11 @@ int	*heredoc_create(t_state *state)
 	return (heredoc_fds);
 }
 
-void	heredoc_writer(t_exec *exec, int *pipe_fd, char *input)
+void	handle_heredoc_input(t_exec *exec, int pipe_fd[2])
 {
-	if (!ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
-	{
-		if (exec->heredocs[exec->heredoc_idx + 1])
-			exec->heredoc_idx++;
-		else
-			return ;
-	}
-	else
-	{
-		if (exec->heredocs[exec->heredoc_idx + 1])
-			return ;
-		else
-		{
-			write(pipe_fd[1], input, ft_strlen(input));
-			write(pipe_fd[1], "\n", 1);
-		}
-	}
-}
-
-void	heredoc_setter(t_exec *exec)
-{
-	int		pipe_fd[2];
 	char	*input;
 
 	input = NULL;
-	if (pipe(pipe_fd) == -1)
-		exit(1);
-	exec->heredoc_idx = 0;
 	while (exec->heredocs != NULL && exec->heredocs[exec->heredoc_idx])
 	{
 		if (input)
@@ -66,12 +41,33 @@ void	heredoc_setter(t_exec *exec)
 		input = readline("> ");
 		if (!input)
 			break ;
-		heredoc_writer(exec, pipe_fd, input);
+		if (!ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
+		{
+			if (exec->heredocs[exec->heredoc_idx + 1])
+				exec->heredoc_idx++;
+			else
+				break ;
+		}
+		else if (!exec->heredocs[exec->heredoc_idx + 1])
+		{
+			write(pipe_fd[1], input, ft_strlen(input));
+			write(pipe_fd[1], "\n", 1);
+		}
 	}
+	free(input);
+}
+
+void	heredoc_setter(t_exec *exec)
+{
+	int		pipe_fd[2];
+
+	if (pipe(pipe_fd) == -1)
+		exit(1);
+	exec->heredoc_idx = 0;
+	handle_heredoc_input(exec, pipe_fd);
 	if (exec->heredocs != NULL && exec->in_type == REDLL)
 		exec->in_fd = pipe_fd[0];
 	else
 		close(pipe_fd[0]);
 	close(pipe_fd[1]);
-	free(input);
 }

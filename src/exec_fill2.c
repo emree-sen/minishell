@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:27 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 15:33:35 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:08:02 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void	ft_relavite_path(char *cmd, char **paths, t_exec *exec)
 		{
 			stat(path, &buf);
 			if (buf.st_mode & S_IFDIR)
-				return (ft_free_split(paths), \
-							ft_set_error(exec, ERR_IS_A_DIRECTORY));
+				return (ft_free_split(paths), ft_set_error(exec,
+						ERR_IS_A_DIRECTORY), free(tmp), free(path));
 			else if ((buf.st_mode & S_IFREG) == 0)
 				return (ft_free_split(paths), ft_set_error(exec, 1261));
 			exec->path = path;
@@ -60,12 +60,17 @@ void	ft_relavite_path(char *cmd, char **paths, t_exec *exec)
 void	path_finder(char *cmd, t_variables *var_root, t_exec *exec)
 {
 	char	**paths;
+	char	*path;
 
-	paths = ft_split(ft_getenv("PATH", var_root), ':');
+	path = ft_getenv("PATH", var_root);
+	paths = ft_split(path, ':');
 	if (!paths)
 		return ;
 	if (is_has_slash(cmd))
+	{
 		ft_absoulte_path(cmd, exec);
+		ft_free_split(paths);
+	}
 	else
 		ft_relavite_path(cmd, paths, exec);
 }

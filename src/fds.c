@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:44 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/14 10:09:45 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/17 18:27:47 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,4 +63,11 @@ void	close_all_fd(int **fds, t_state *state)
 		close(fds[i][1]);
 		i++;
 	}
+}
+
+int	**prepare_fds(t_state *state)
+{
+	if (state->arr_len > 1)
+		return (fds_filler(NULL, state));
+	return (NULL);
 }
