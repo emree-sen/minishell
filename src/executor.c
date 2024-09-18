@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:36 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:24:14 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 18:27:32 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,7 @@ void	executor(t_state *state, t_variables *var_root)
 	exec = exec_filler(state, var_root);
 	execute_heredocs(exec);
 	ft_print_exec_errors(exec, state);
+	g_sig = IN_CMD;
 	fds = prepare_fds(state);
 	pid = malloc(sizeof(pid_t) * state->arr_len);
 	params.exec = exec;
@@ -106,5 +107,6 @@ void	executor(t_state *state, t_variables *var_root)
 	execute_commands(&params, pid);
 	close_all_fd(fds, state);
 	wait_for_children(pid, state);
+	g_sig = AFTER_CMD;
 	free_resources(exec, pid, fds, state);
 }

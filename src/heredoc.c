@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:52 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:21:05 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 18:55:04 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,24 @@ int	*heredoc_create(t_state *state)
 	return (heredoc_fds);
 }
 
+void	heredoc_reader(char *input, t_exec *exec, int pipe_fd[2])
+{
+	if (!exec->heredocs[exec->heredoc_idx + 1]
+		&& ft_strcmp(input, exec->heredocs[exec->heredoc_idx]))
+	{
+		write(pipe_fd[1], input, ft_strlen(input));
+		write(pipe_fd[1], "\n", 1);
+	}
+}
+
 void	handle_heredoc_input(t_exec *exec, int pipe_fd[2])
 {
 	char	*input;
 
 	input = NULL;
-	while (exec->heredocs != NULL && exec->heredocs[exec->heredoc_idx])
+	g_sig = IN_HEREDOC;
+	while (exec->heredocs != NULL
+		&& exec->heredocs[exec->heredoc_idx] && g_sig == IN_HEREDOC)
 	{
 		if (input)
 			free(input);
@@ -48,12 +60,9 @@ void	handle_heredoc_input(t_exec *exec, int pipe_fd[2])
 			else
 				break ;
 		}
-		else if (!exec->heredocs[exec->heredoc_idx + 1])
-		{
-			write(pipe_fd[1], input, ft_strlen(input));
-			write(pipe_fd[1], "\n", 1);
-		}
+		heredoc_reader(input, exec, pipe_fd);
 	}
+	g_sig = AFTER_HEREDOC;
 	free(input);
 }
 

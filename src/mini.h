@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:03 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 12:03:01 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 18:38:23 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,20 @@
 # include <unistd.h>
 # include <readline/readline.h>
 # include <readline/history.h>
-# include "../libft/libft.h"
+# include "../lib/libft.h"
 # include <fcntl.h>
 # include <termios.h>
 # include "sys/stat.h"
 # include "errno.h"
+# include <signal.h>
+# include <sys/ioctl.h>
+
+extern int	g_sig;
+
+# define IN_HEREDOC 2
+# define AFTER_HEREDOC 3
+# define IN_CMD 4
+# define AFTER_CMD 5
 
 # define ERR_CMD_NOT_FOUND 127
 # define ERR_IS_A_DIRECTORY 126
@@ -42,8 +51,6 @@
 # define BUILTIN 37
 # define YES_CMD 38
 # define NO_CMD 39
-
-# define M "minishell: "
 
 typedef enum e_token_type
 {
@@ -261,5 +268,7 @@ int			is_alporund(char *str);
 int			token_arr_len(t_token *token);
 void		initialize_state(t_state *state, t_variables **var_root);
 void		process_line(char *line, t_state *state, t_variables *var_root);
+void		handle_signals(void);
+void		rl_replace_line(const char *test, int clear_undo);
 
 #endif

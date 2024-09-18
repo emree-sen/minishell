@@ -23,6 +23,7 @@
 		"errno.h": "c",
 		"termios.h": "c",
 		"mini.h": "c",
-		"stat.h": "c"
+		"stat.h": "c",
+		"fcntl.h": "c"
 	}
 }

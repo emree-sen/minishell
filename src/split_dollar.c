@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:20 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 12:04:03 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/18 14:36:28 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,9 +60,10 @@ void	free_dollar(t_dollar *d)
 void	token_dollar_value_finder(t_dollar *d, t_token *tmp,
 		t_variables *var_root, t_state *state)
 {
-	if (d->flag == -1 && tmp->str[d->i] == '$' && tmp->str[d->i + 1] != '\"'
+	if (d->flag == -1 && d->flag2 == -1 && tmp->str[d->i] == '$'
+		&& tmp->str[d->i + 1] != '\"' && tmp->str[d->i + 1] != ' '
 		&& tmp->str[d->i + 1] != '\'' && tmp->str[d->i + 1] != '\0'
-		&& tmp->str[d->i + 1] != '$' && tmp->str[d->i + 1] != ' ')
+		&& tmp->str[d->i + 1] != '$')
 	{
 		d->value = token_value_finder(tmp, d, var_root);
 		token_replace_value(&tmp, d, &d->i, state);
