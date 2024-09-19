@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 18:11:49 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:12:56 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 17:05:13 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ void	token_value_checker(t_variables *var_tmp, char *key, char **value)
 {
 	if (!ft_strcmp(var_tmp->key, key))
 	{
+		if (*value)
+			free(*value);
 		*value = ft_strdup(var_tmp->value);
 		return ;
 	}

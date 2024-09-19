@@ -6,13 +6,13 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:55 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 13:09:48 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 13:52:45 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "mini.h"
 
-void	init_heredoc(t_token *tmp, t_exec *exec)
+void	init_heredoc(t_token *tmp, t_exec *exec, t_variables *var_root)
 {
 	int	heredoc_num;
 
@@ -22,7 +22,8 @@ void	init_heredoc(t_token *tmp, t_exec *exec)
 		exec->heredocs = malloc(sizeof(char *) * (heredoc_num + 1));
 		exec->heredocs[heredoc_num] = NULL;
 	}
-	exec->heredocs[exec->heredoc_idx] = ft_strdup(tmp->str);
+	if (heredoc_dollar_check(tmp, exec, var_root) == 0)
+		exec->heredocs[exec->heredoc_idx] = ft_strdup(tmp->str);
 	exec->heredoc_idx++;
 }
 
@@ -67,10 +68,10 @@ void	init_redll(t_token *tmp, t_exec *exec)
 	free(exec->input_file);
 }
 
-void	init_redirection(t_token *tmp, t_exec *exec)
+void	init_redirection(t_token *tmp, t_exec *exec, t_variables *var_root)
 {
 	if (tmp->type == HEREDOC)
-		init_heredoc(tmp, exec);
+		init_heredoc(tmp, exec, var_root);
 	else if (tmp->type == REDR && exec->err_val == 0)
 		init_redr(tmp, exec);
 	else if (tmp->type == REDRR && exec->err_val == 0)

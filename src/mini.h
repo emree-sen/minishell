@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:03 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 18:38:23 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 13:53:43 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,17 +132,14 @@ void		token_add_next(t_token *token, t_token *new);
 void		token_list_printer(t_token *root);
 void		token_add_prev(t_token **root, t_token *token, t_token *new);
 void		token_add_start(t_token **root, t_token *token);
-
 t_variables	*variables_new(char *key, char *value);
 void		variables_list_printer(t_variables *root);
 void		variables_add_last(t_variables **root, t_variables *variables);
 void		variables_del(t_variables *var);
-
 int			pass_quote(char *str, int qi);
 int			pass_str(char *str, int si);
 int			pass_str_pls(char *str, int i);
 int			pass_any(char *str, int *ai, char any);
-
 void		toggle_quote(int *quote, char c);
 void		toggle_single_quote(int *quote, char c, int *fl);
 int			is_only_quote(char *str);
@@ -244,14 +241,13 @@ void		printf_spesific_error(int err_type, char *str);
 void		new_variable_adder(t_variables *var_root, char *key, char *value);
 void		dup_exec_in_out(t_exec **exec, int i);
 void		check_first_command(t_exec **exec, int **fds, int i);
-void		init_redirection(t_token *tmp, t_exec *exec);
+void		init_redirection(t_token *tmp, t_exec *exec, t_variables *var_root);
 void		ft_free_exec(t_exec **exec);
 void		exit_num(int ex_num);
 void		ft_set_error(t_exec *exec, int err);
 void		ft_free_var_root(t_variables *var_root);
 void		ft_free_token_arr(t_token **token_arr);
 void		ft_free_root(t_token *root);
-
 void		execute_commands(t_exec_params *params, pid_t *pid);
 pid_t		fork_process(t_exec_params *params, int i);
 void		handle_child_process(t_exec_params *params, int i);
@@ -270,5 +266,9 @@ void		initialize_state(t_state *state, t_variables **var_root);
 void		process_line(char *line, t_state *state, t_variables *var_root);
 void		handle_signals(void);
 void		rl_replace_line(const char *test, int clear_undo);
+void		token_dollar_value_finder(t_dollar *d, t_token *tmp,
+				t_variables *var_root, t_state *state);
+int			heredoc_dollar_check(t_token *tmp, t_exec *exec,
+				t_variables *var_root);
 
 #endif

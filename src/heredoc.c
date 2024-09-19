@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:52 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 18:55:04 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 17:14:24 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,4 +79,26 @@ void	heredoc_setter(t_exec *exec)
 	else
 		close(pipe_fd[0]);
 	close(pipe_fd[1]);
+}
+
+int	heredoc_dollar_check(t_token *tmp, t_exec *exec, t_variables *var_root)
+{
+	int	i;
+	int	flag;
+
+	i = 0;
+	flag = 0;
+	while (var_root)
+	{
+		if (ft_strcmp(tmp->str, var_root->value) == 0)
+		{
+			exec->heredocs[exec->heredoc_idx] = ft_strdup("$");
+			exec->heredocs[exec->heredoc_idx] = ft_strjoin
+				(exec->heredocs[exec->heredoc_idx], var_root->key);
+			flag = 1;
+			break ;
+		}
+		var_root = var_root->next;
+	}
+	return (flag);
 }

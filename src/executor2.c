@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 18:24:16 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/17 18:27:36 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 13:59:56 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ void	execute_commands(t_exec_params *params, pid_t *pid)
 		{
 			execute_single_builtin(params->exec, params->state,
 				params->var_root, i);
+			params->state->status = 0;
 			break ;
 		}
 		pid[i] = fork_process(params, i);

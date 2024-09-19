@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:09:25 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/18 13:10:30 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 12:17:03 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ void	fill_exec(t_exec *exec, t_token *tmp, t_variables *var_root)
 					exec->args = args_filler(tmp, exec->path);
 			}
 		}
-		init_redirection(tmp, exec);
+		init_redirection(tmp, exec, var_root);
 		tmp = tmp->next;
 	}
 }
