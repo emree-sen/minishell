@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/14 10:10:17 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/19 17:09:32 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 18:19:39 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,7 @@ void	dollar_value_checker(t_state *state, t_dollar *dollar)
 	else if (ft_strcmp(dollar->key, "0") == 0)
 		dollar->value = ft_strdup("minishell");
 	else
-	{
-		dollar->value = ft_strdup("");
-		write(1, "\n", 1);
-	}
+		dollar->value = ft_strdup(" ");
 }
 
 void	token_replace_value(t_token **str, t_dollar *dollar, int *i,
