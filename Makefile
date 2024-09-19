@@ -1,6 +1,6 @@
 NAME = minishell
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g #-fsanitize=address 
+CFLAGS = -Wall -Wextra -Werror -g
 READLINE = -L./lib/readline/lib -I./lib/readline/include/readline -lreadline
 RL = ./lib/readline/lib/libreadline.a
 RM = rm -rf

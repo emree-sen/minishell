@@ -6,7 +6,7 @@
 /*   By: emsen <emsen@student.42istanbul.com.tr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/17 18:11:49 by emsen             #+#    #+#             */
-/*   Updated: 2024/09/19 17:05:13 by emsen            ###   ########.fr       */
+/*   Updated: 2024/09/19 19:36:22 by emsen            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ t_variables	*dup_veriables(char **environ)
 
 	i = -1;
 	root = NULL;
+	variables = variables_new("-FLAG", "0");
+	variables_add_last(&root, variables);
 	while (environ[++i])
 	{
 		key = ft_substr(environ[i], 0, ft_strchr(environ[i], '=') - environ[i]);
